@@ -1,0 +1,279 @@
+﻿@{
+    ViewData["Title"] = "Privacy";
+    ViewData["Subtitle"] = "How ABC Retail collects, uses, and protects your information";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"]</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light">
+            <i class="bi bi-house me-1"></i> Home
+        </a>
+    </div>
+</div>
+
+<!-- Intro -->
+<div class="glass-card p-3 mb-3">
+    <div class="prose">
+        <p class="mb-2 lead">
+            This Privacy Notice explains what data we collect, why we collect it, and how we keep it safe when you
+            use the ABC Retail website and admin tools.
+        </p>
+        <ul class="mb-0">
+            <li>We only collect the information needed to run the store and fulfil orders.</li>
+            <li>We never sell your personal information.</li>
+            <li>You can request access, correction, or deletion of your data at any time.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Sections -->
+<div class="glass-card p-3">
+    <div class="accordion" id="privacyAccordion">
+        <!-- 1) Who we are -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="whoHeading">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#who" aria-expanded="true" aria-controls="who">
+                    1) Who we are
+                </button>
+            </h2>
+            <div id="who" class="accordion-collapse collapse show" aria-labelledby="whoHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    ABC Retail (“we”, “us”) is an online retailer. This site is used by our staff to manage customers,
+                    products, file storage and queue-based processing required to operate the store.
+                </div>
+            </div>
+        </div>
+
+        <!-- 2) What data we collect -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="collectHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collect" aria-expanded="false" aria-controls="collect">
+                    2) What data we collect
+                </button>
+            </h2>
+            <div id="collect" class="accordion-collapse collapse" aria-labelledby="collectHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="mb-2">Customer data</h6>
+                            <ul class="mb-0">
+                                <li>Identity: first/last name, date of birth</li>
+                                <li>Contact: email, phone, address, country</li>
+                                <li>Company (if provided)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-2">Product & media</h6>
+                            <ul class="mb-0">
+                                <li>Product details: name, category, price, stock</li>
+                                <li>Images uploaded for products</li>
+                                <li>Operational messages (e.g., “product added”) in queues</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3) How we use it -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="useHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#use" aria-expanded="false" aria-controls="use">
+                    3) How we use your information
+                </button>
+            </h2>
+            <div id="use" class="accordion-collapse collapse" aria-labelledby="useHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <ul class="mb-0">
+                        <li>Create and manage customer records</li>
+                        <li>Manage products, images, stock and availability</li>
+                        <li>Run background processing (queues) and file storage</li>
+                        <li>Secure, troubleshoot and improve our services</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4) Where and how we store data -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="storeHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#store" aria-expanded="false" aria-controls="store">
+                    4) Where and how we store data
+                </button>
+            </h2>
+            <div id="store" class="accordion-collapse collapse" aria-labelledby="storeHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body">
+                    <div class="table-responsive">
+                        <table class="table table-neon table-compact align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Purpose</th>
+                                    <th>Examples of data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Azure SQL Database</td>
+                                    <td>Relational data & reporting</td>
+                                    <td>Customers, orders, structured records</td>
+                                </tr>
+                                <tr>
+                                    <td>Azure Blob Storage</td>
+                                    <td>Media storage</td>
+                                    <td>Product images & uploaded files</td>
+                                </tr>
+                                <tr>
+                                    <td>Azure Table Storage</td>
+                                    <td>Entity storage</td>
+                                    <td>Products, customers (key–value entities)</td>
+                                </tr>
+                                <tr>
+                                    <td>Azure Queue Storage / Service Bus</td>
+                                    <td>Background processing</td>
+                                    <td>Operational messages</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="prose mt-3 mb-0">
+                        All data is transmitted over HTTPS/TLS. Access is restricted to authorised personnel.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5) Data retention -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="retentionHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#retention" aria-expanded="false" aria-controls="retention">
+                    5) Data retention
+                </button>
+            </h2>
+            <div id="retention" class="accordion-collapse collapse" aria-labelledby="retentionHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <ul class="mb-0">
+                        <li>Customer and product records: retained as needed for operations or law.</li>
+                        <li>Images/files: kept while the related product is active; removed when no longer needed.</li>
+                        <li>Queue messages: short-lived; processed and then deleted automatically.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6) Sharing -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="shareHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#share" aria-expanded="false" aria-controls="share">
+                    6) Sharing & processors
+                </button>
+            </h2>
+            <div id="share" class="accordion-collapse collapse" aria-labelledby="shareHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <p class="mb-2">
+                        We share data only with service providers necessary to run this site (e.g., Microsoft Azure hosting),
+                        under contracts that require confidentiality and security.
+                    </p>
+                    <ul class="mb-0">
+                        <li>Hosting/Cloud infrastructure: Microsoft Azure</li>
+                        <li>Monitoring/telemetry (if enabled): Application Insights</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7) Security -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="securityHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#security" aria-expanded="false" aria-controls="security">
+                    7) Security
+                </button>
+            </h2>
+            <div id="security" class="accordion-collapse collapse" aria-labelledby="securityHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <ul class="mb-0">
+                        <li>Encryption in transit (HTTPS/TLS)</li>
+                        <li>Access control & role-based permissions for admins</li>
+                        <li>Backups and fault-tolerance on cloud services</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8) Your rights -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="rightsHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rights" aria-expanded="false" aria-controls="rights">
+                    8) Your privacy rights
+                </button>
+            </h2>
+            <div id="rights" class="accordion-collapse collapse" aria-labelledby="rightsHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    <p class="mb-2">You may request to:</p>
+                    <ul class="mb-2">
+                        <li>Access a copy of your personal information</li>
+                        <li>Correct or update your information</li>
+                        <li>Delete your information (where legally permissible)</li>
+                        <li>Object to or restrict certain processing</li>
+                    </ul>
+                    <p class="mb-0">
+                        To exercise these rights, contact us using the details below.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9) Cookies -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="cookiesHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cookies" aria-expanded="false" aria-controls="cookies">
+                    9) Cookies & analytics
+                </button>
+            </h2>
+            <div id="cookies" class="accordion-collapse collapse" aria-labelledby="cookiesHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    This site may use essential cookies for sign-in/session management and optional analytics cookies
+                    to understand usage (if enabled). You can control cookies in your browser.
+                </div>
+            </div>
+        </div>
+
+        <!-- 10) Contact -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="contactHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact" aria-expanded="false" aria-controls="contact">
+                    10) Contact us
+                </button>
+            </h2>
+            <div id="contact" class="accordion-collapse collapse" aria-labelledby="contactHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body">
+                    <dl class="row detail-dl mb-0">
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9"><a href="mailto:ST10382638@vcconnect.edu.za">ST10382638@vcconnect.edu.za</a></dd>
+                        <dt class="col-sm-3">Address</dt>
+                        <dd class="col-sm-9">Quadrant Building, 146 Campground Road, Newlands, 7700</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11) Changes -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="changesHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#changes" aria-expanded="false" aria-controls="changes">
+                    11) Changes to this notice
+                </button>
+            </h2>
+            <div id="changes" class="accordion-collapse collapse" aria-labelledby="changesHeading" data-bs-parent="#privacyAccordion">
+                <div class="accordion-body prose">
+                    We may update this notice from time to time. Material changes will be highlighted on this page.
+                    <div class="text-muted small mt-2">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

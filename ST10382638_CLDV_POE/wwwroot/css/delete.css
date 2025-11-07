@@ -1,0 +1,115 @@
+﻿/* === Delete modal skin (scoped to the confirm modal only) === */
+
+/* Fallbacks use your theme variables if present */
+:root {
+    --del-text: var(--text, #f5f8ff);
+    --del-muted: var(--muted, #c6cee2);
+    --del-border: var(--card-border, rgba(255,255,255,.22));
+    --del-bg-a: rgba(11, 15, 26, 0.7); /* 60% opaque smoky top */
+    --del-bg-b: rgba(15, 16, 34, 0.65); /* 55% opaque smoky bottom */
+    --del-shadow: 0 20px 60px rgba(0,0,0,.45);
+    --del-danger-1: #ff5c5c;
+    --del-danger-2: #ff3b3b;
+    --del-accent: var(--primary, #7cf0ff);
+}
+
+/* Backdrop only when THIS modal is open */
+#confirmDeleteModal.show ~ .modal-backdrop.show {
+    background: rgba(5, 8, 18, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+/* Dialog sizing */
+#confirmDeleteModal .modal-dialog {
+    max-width: 420px; /* a touch wider than modal-sm */
+}
+
+/* Glassy content */
+#confirmDeleteModal .modal-content {
+    background: linear-gradient(180deg, var(--del-bg-a), var(--del-bg-b));
+    border: 1px solid var(--del-border);
+    border-radius: 1rem;
+    color: var(--del-text);
+    box-shadow: var(--del-shadow);
+    overflow: hidden;
+}
+
+/* Header */
+#confirmDeleteModal .modal-title {
+    letter-spacing: .3px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+    #confirmDeleteModal .modal-title .bi {
+        color: var(--del-accent);
+        filter: drop-shadow(0 0 6px rgba(124,240,255,.45));
+    }
+
+#confirmDeleteModal .btn-close {
+    filter: invert(1) contrast(120%);
+}
+
+/* Body */
+#confirmDeleteModal .modal-body {
+    color: var(--del-text);
+}
+
+    #confirmDeleteModal .modal-body .text-muted {
+        color: var(--del-muted) !important;
+    }
+
+/* Footer buttons */
+#confirmDeleteModal .btn {
+    border-radius: .7rem;
+    font-weight: 600;
+}
+
+#confirmDeleteModal .btn-outline-light {
+    border: 1px solid var(--del-border);
+    color: var(--del-text);
+    background: transparent;
+}
+
+    #confirmDeleteModal .btn-outline-light:hover {
+        background: rgba(255,255,255,.06);
+    }
+
+/* Primary destructive */
+#confirmDeleteModal .btn-danger {
+    background: linear-gradient(180deg, var(--del-danger-1), var(--del-danger-2));
+    border: 1px solid rgba(255,90,90,.65);
+    color: #000;
+    box-shadow: 0 10px 30px rgba(255,60,60,.18);
+}
+
+    #confirmDeleteModal .btn-danger:hover {
+        filter: brightness(1.06);
+    }
+
+/* Toast (feedback bubble) */
+#toastDelete {
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)) !important;
+    border: 1px solid var(--del-border) !important;
+    color: var(--del-text);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: .9rem;
+}
+
+    #toastDelete .btn-close {
+        filter: invert(1) contrast(120%);
+    }
+
+/* Subtle press animation for the confirm button */
+#confirmDeleteModal .btn-danger:active {
+    transform: translateY(1px);
+}
+
+/* Small screens: let it breathe */
+@media (max-width: 420px) {
+    #confirmDeleteModal .modal-dialog {
+        margin: .75rem;
+    }
+}

@@ -1,0 +1,433 @@
+﻿/* ---- Page header with actions ---- */
+.page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.25rem;
+}
+
+    .page-head h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        letter-spacing: .3px;
+        color: var(--text);
+    }
+
+.page-sub {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* ---- Glass card wrapper ---- */
+.glass-card {
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+}
+
+/* ---- Neon table ---- */
+.table-neon {
+    --tbl-border: rgba(255,255,255,0.12);
+    color: var(--text);
+}
+
+    .table-neon thead th {
+        border-bottom: 1px solid var(--tbl-border);
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: .2px;
+    }
+
+    .table-neon tbody tr {
+        border-top: 1px solid var(--tbl-border);
+        transition: background .15s ease;
+    }
+
+        .table-neon tbody tr:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+    .table-neon .actions .btn {
+        padding: .25rem .5rem;
+    }
+
+/* ---- Forms ---- */
+.form-card {
+    padding: 1rem;
+}
+
+.form-label {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    border: 1px solid var(--card-border);
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 .2rem rgba(124,240,255,.25);
+    }
+
+.input-hint {
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+/* ---- Badges ---- */
+.badge-soft {
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+}
+
+/* ---- Empty state ---- */
+.empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+}
+
+    .empty .icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: .5rem;
+        color: var(--primary);
+    }
+
+/* ---- Buttons aligned to theme ---- */
+.btn-primary {
+    color: #000;
+    background: linear-gradient(180deg, var(--primary), #b8fbff);
+    border-color: transparent;
+}
+
+.btn-outline-light {
+    border-color: var(--card-border);
+    color: var(--text);
+}
+
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,0.06);
+    }
+
+/* ---- Pagination ---- */
+.pagination .page-link {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(180deg, var(--primary), #b8fbff);
+    color: #000;
+    border-color: transparent;
+}
+
+/* Make table text brighter and easier to read */
+.table,
+.table th,
+.table td {
+    color: #f1f5ff !important; /* brighter than --text */
+}
+
+    /* Header contrast */
+    .table thead th {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    /* Muted small text stays readable */
+    .table .text-muted {
+        color: rgba(200, 210, 230, 0.8) !important;
+    }
+
+    /* Hover row highlight for better scanning */
+    .table tbody tr:hover {
+        background: rgba(124, 240, 255, 0.05); /* light neon cyan glow */
+        transition: background 0.15s ease-in-out;
+    }
+
+/* Details view helpers */
+.detail-dl dt {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.detail-dl dd {
+    color: #f1f5ff;
+    margin-bottom: .5rem;
+}
+
+/* --- Products table helpers --- */
+.thumb-64 {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: .5rem;
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.03);
+    box-shadow: var(--shadow);
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+/* allow truncation within flex items */
+
+.truncate-32, .truncate-48 {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+.truncate-32 {
+    max-width: 32ch;
+}
+
+.truncate-48 {
+    max-width: 48ch;
+}
+
+.price {
+    font-variant-numeric: tabular-nums;
+}
+
+/* availability badges */
+.badge-yes {
+    background: rgba(0,255,162,0.1);
+    border: 1px solid rgba(0,255,162,0.45);
+    color: #caffe5;
+}
+
+.badge-no {
+    background: rgba(255,70,70,0.12);
+    border: 1px solid rgba(255,70,70,0.45);
+    color: #ffd6d6;
+}
+
+/* compact table spacing (shared) */
+.table-compact tbody td {
+    padding: .6rem .75rem;
+}
+
+/* --- Details page big image (used by Product Details) --- */
+.product-hero{
+  width:100%;
+  aspect-ratio: 4 / 3;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--card-border);
+  border-radius: .75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+    .product-hero__img,
+    .product-hero video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none; /* prevent user interaction */
+    }
+
+
+/* --- Edit page preview panel (used by Product Edit) --- */
+.product-preview{ overflow:hidden; border-radius:.75rem; }
+.product-preview__imgwrap{
+  width:100%;
+  aspect-ratio: 4 / 3;
+  background: rgba(255,255,255,0.03);
+  border-bottom:1px solid var(--card-border);
+}
+.product-preview__img{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+
+/* --- Sticky table head (used in list tables) --- */
+.table-head-sticky th{
+  position: sticky; top: 0; z-index: 1;
+  background: rgba(15,16,34,0.9); /* match your dark bg */
+  backdrop-filter: blur(6px);
+}
+
+/* --- Truncation utilities we referenced --- */
+.truncate-24{ max-width:24ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.truncate-28{ max-width:28ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* You already have truncate-32 / truncate-48, keep those too */
+
+.link-truncate{
+  display:inline-block; max-width:32ch;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  vertical-align:bottom;
+}
+
+.queue-list .list-group-item {
+    background: transparent;
+    border-color: var(--card-border);
+}
+
+.queue-msg {
+    white-space: pre-wrap; /* wrap long messages */
+    word-break: break-word;
+    color: #f1f5ff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* --- Readable body copy --- */
+.prose,
+.glass-card .prose {
+    color: #eaf1ff; /* brighter than --text */
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+    .prose p {
+        margin-bottom: .75rem;
+    }
+
+    .prose a {
+        color: var(--primary);
+    }
+
+    .prose .text-muted,
+    .prose small {
+        color: rgba(220,230,255,.8);
+    }
+
+/* --- Accordion on dark theme --- */
+.accordion-item {
+    background: transparent;
+    border-color: var(--card-border);
+}
+
+.accordion-button {
+    background: rgba(255,255,255,.03);
+    color: var(--text);
+    border-bottom: 1px solid var(--card-border);
+}
+
+    .accordion-button:not(.collapsed) {
+        background: rgba(255,255,255,.06);
+        color: var(--primary);
+        box-shadow: none;
+    }
+
+    .accordion-button:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 .2rem rgba(124,240,255,.25);
+    }
+
+.accordion-body {
+    color: #f1f5ff; /* make content inside readable */
+}
+
+.accordion-button::after { /* make chevron visible on dark */
+    filter: invert(1) contrast(120%);
+}
+
+/* ===== Better dark-theme selects (readability + contrast) ===== */
+.form-select {
+    /* Higher contrast than the base rule */
+    background: rgba(255,255,255,0.10);
+    color: #eaf1ff;
+    border: 1px solid var(--card-border);
+    font-size: 1.05rem; /* slightly larger text */
+    letter-spacing: .2px;
+    padding-top: .65rem;
+    padding-bottom: .65rem;
+    /* Custom caret to stay visible on dark bg */
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>\
+<path fill='%23eaf1ff' d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/>\
+</svg>");
+    background-repeat: no-repeat;
+    background-position: right .8rem center;
+    background-size: 14px;
+    padding-right: 2.2rem; /* room for caret */
+}
+
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 .2rem rgba(124,240,255,.25);
+    }
+
+    /* Dropdown list colors (browser support varies, but improves most cases) */
+    .form-select option,
+    .form-select optgroup {
+        background: #0f1022; /* your dark bg */
+        color: #eaf1ff;
+    }
+
+        /* Placeholder-like first option */
+        .form-select option[value=""],
+        .form-select option[disabled] {
+            color: rgba(220,230,255,.65);
+        }
+
+/* Stronger contrast variant you can opt into */
+.select-contrast {
+    background: rgba(255,255,255,0.12);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.22);
+}
+
+/* (Optional) disable Windows/old Edge arrow */
+.form-select::-ms-expand {
+    display: none;
+}
+
+/* --- Search bar card matches glass aesthetic --- */
+.search-card {
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
+/* --- Soft alerts that fit the theme --- */
+.alert-soft {
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.06);
+    color: #eaf1ff;
+    border-radius: .75rem;
+    padding: .65rem .9rem;
+}
+
+.alert-soft-warning {
+    /* slight cyan tint with neon vibe */
+    background: rgba(124,240,255,0.08);
+    border-color: rgba(124,240,255,0.35);
+}
+
+.alert-soft .icon {
+    margin-right: .5rem;
+    vertical-align: -2px;
+    opacity: .9;
+}
+
+/* keep the hint line consistent with your form styling */
+.input-hint {
+    display: block;
+    margin-top: .4rem;
+}

@@ -1,0 +1,124 @@
+﻿/* ===== Futuristic site-wide theme to match Home screen (drop-in) ===== */
+:root {
+    --bg-1: #0b0f1a;
+    --bg-2: #0f1022;
+    --text: #e6e9f5;
+    --muted: #9aa3b2;
+    --primary: #7cf0ff;
+    --primary-2: #8a7cff;
+    --accent: #00ffa2;
+    --card: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.14);
+    --ring: rgba(124,240,255,.6);
+}
+
+/* Layout + background: ensure no “black gap” when scrolling */
+html, body {
+    height: 100%;
+    background-color: var(--bg-1);
+}
+
+body {
+    background: radial-gradient(1200px 700px at 10% -10%, rgba(124,240,255,.08), transparent 60%), radial-gradient(900px 600px at 110% 10%, rgba(138,124,255,.08), transparent 60%), linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Let main fill space so footer sits at the bottom */
+main[role="main"] {
+    flex: 1;
+}
+
+/* ===== Navbar (glass + neon) ===== */
+.navbar {
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--card-border) !important;
+}
+
+    .navbar .navbar-brand {
+        color: var(--text) !important;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .navbar .nav-link {
+        color: var(--muted) !important;
+        font-weight: 600;
+        position: relative;
+        transition: color .2s ease;
+    }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link:focus {
+            color: var(--primary) !important;
+            text-decoration: none;
+        }
+
+        .navbar .nav-link.active {
+            color: var(--primary) !important;
+        }
+
+            .navbar .nav-link.active::after,
+            .navbar .nav-link:hover::after {
+                content: "";
+                position: absolute;
+                left: .5rem;
+                right: .5rem;
+                bottom: .25rem;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--primary), var(--primary-2), transparent);
+                filter: drop-shadow(0 0 6px rgba(124,240,255,.6));
+            }
+/* Make toggler icon visible on dark bg */
+.navbar-light .navbar-toggler-icon {
+    filter: invert(1) contrast(120%);
+}
+
+/* ===== Footer: slim + auto height, no overlap ===== */
+.footer {
+    background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.06));
+    border-top: 1px solid var(--card-border);
+    color: var(--muted);
+    line-height: normal !important; /* override any fixed 60px line-height */
+    padding: .5rem 0 !important; /* slimmer footer */
+    margin-top: auto; /* pushes footer to bottom on short pages */
+    position: static !important; /* kill old absolute positioning */
+    width: 100%;
+    white-space: normal;
+}
+
+    .footer a {
+        color: var(--primary) !important;
+    }
+
+        .footer a:hover {
+            color: var(--accent) !important;
+        }
+
+/* General overrides to match theme */
+a {
+    color: var(--primary);
+}
+
+.btn-primary {
+    color: #000;
+    background: linear-gradient(180deg, var(--primary), #b8fbff);
+    border-color: transparent;
+}
+
+.border-top {
+    border-top: 1px solid var(--card-border) !important;
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--card-border) !important;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.25);
+}

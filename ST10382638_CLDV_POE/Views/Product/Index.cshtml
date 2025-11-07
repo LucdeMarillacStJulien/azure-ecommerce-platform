@@ -1,0 +1,153 @@
+﻿@model IEnumerable<ST10382638_CLDV_POE.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+    ViewData["Subtitle"] = "Manage product catalog and inventory";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"]</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> New Product
+        </a>
+    </div>
+</div>
+
+<form method="get" asp-controller="product" asp-action="Index" class="mb-3 search-card">
+    <div class="input-group">
+        <input name="id" type="text" class="form-control"
+               placeholder="Enter Product ID"
+               value="@(Context.Request.Query["id"])">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+    <small class="input-hint">Leave empty to view all Products.</small>
+</form>
+
+@if (!string.IsNullOrEmpty(ViewBag.Message as string))
+{
+    <div class="alert-soft alert-soft-warning mt-2" role="status" aria-live="polite">
+        <i class="bi bi-exclamation-triangle-fill icon"></i> @ViewBag.Message
+    </div>
+    <br />
+}
+
+<div class="glass-card p-3">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty">
+            <i class="bi bi-box-seam icon"></i>
+            <div>No products yet.</div>
+            <div class="mt-2">
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Add Product
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-neon table-compact align-middle">
+                <thead class="table-head-sticky">
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th class="d-none d-lg-table-cell">Category</th>
+                        <th>Price</th>
+                        <th class="d-none d-xl-table-cell">Stock</th>
+                        <th>Available</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        var ext = System.IO.Path.GetExtension(p.ImageUrl)?.ToLower();
+                        <tr data-row="product">
+                            <td>@p.RowKey</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (ext == ".mp4" || ext == ".webm" || ext == ".mov" || ext == ".avi" || ext == ".mkv")
+                                    {
+                                        <video class="thumb-64"
+                                               src="@p.ImageUrl"
+                                               preload="metadata"
+                                               playsinline
+                                               muted>
+                                        </video>
+                                    }
+                                    else
+                                    {
+                                        <img src="@p.ImageUrl" alt="@p.ProductName" class="thumb-64" />
+                                    }
+                                    <div class="min-w-0">
+                                        <div class="fw-semibold truncate-32">@p.ProductName</div>
+                                        @if (!string.IsNullOrWhiteSpace(p.Description))
+                                        {
+                                            <div class="text-muted small truncate-48">@p.Description</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                <span class="badge badge-soft">@p.Category</span>
+                            </td>
+                            <td class="price text-nowrap">R @p.Price.ToString("F2")</td>
+                            <td class="d-none d-xl-table-cell">@p.StockQuantity</td>
+                            <td>
+                                @if (p.IsAvailable)
+                                {
+                                    <span class="badge badge-yes">
+                                        <i class="bi bi-check2 me-1"></i>In stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-no">
+                                        <i class="bi bi-x-lg me-1"></i>Unavailable
+                                    </span>
+                                }
+                            </td>
+                            <td class="actions text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@p.RowKey" class="btn btn-outline-light" title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@p.RowKey" class="btn btn-outline-light" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-outline-light js-delete-product"
+                                       data-id="@p.RowKey"
+                                       data-name="@p.ProductName"
+                                       title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-2 text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Long names/descriptions are truncated here. Open <strong>Details</strong> to see full content.
+        </div>
+    }
+</div>
+
+<partial name="_ConfirmDeleteModal" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/delete.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/delete.js" asp-append-version="true"></script>
+}

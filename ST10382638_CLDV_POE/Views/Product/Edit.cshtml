@@ -1,0 +1,122 @@
+﻿@model ST10382638_CLDV_POE.Models.Product
+
+@{
+    ViewData["Title"] = "Edit Product";
+    ViewData["Subtitle"] = "Update product details";
+
+    var fallbackImg = Url.Content("~/img/placeholder-product.png");
+    var previewSrc = string.IsNullOrWhiteSpace(Model.ImageUrl) ? fallbackImg : Model.ImageUrl;
+
+    var ext = System.IO.Path.GetExtension(previewSrc)?.ToLowerInvariant();
+    bool isVideo = ext is ".mp4" or ".webm" or ".mov" or ".avi" or ".mkv";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"]</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-short me-1"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="glass-card form-card">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <!-- Hidden keys -->
+        <input type="hidden" asp-for="PartitionKey" />
+        <input type="hidden" asp-for="RowKey" />
+        <input type="hidden" asp-for="ETag" />
+        <input type="hidden" asp-for="ImageUrl" />
+
+        <div class="row g-4">
+            <!-- Left column: form fields -->
+            <div class="col-lg-8">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="ProductName" class="form-label"></label>
+                        <input asp-for="ProductName" class="form-control" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Category" class="form-label"></label>
+                        <input asp-for="Category" class="form-control" />
+                        <span asp-validation-for="Category" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Price" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">R</span>
+                            <input asp-for="Price" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="StockQuantity" class="form-label"></label>
+                        <input asp-for="StockQuantity" type="number" min="0" class="form-control" />
+                        <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Replace Image/Video (optional)</label>
+                        <input id="imageFile" type="file" name="imageFile" accept="image/*,video/*" class="form-control" />
+                        <div class="input-hint">
+                            Leave blank to keep the current media.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Save
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-light">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right column: media preview -->
+            <div class="col-lg-4">
+                <div class="product-preview glass-card">
+                    <div class="product-preview__imgwrap">
+                        @if (isVideo)
+                        {
+                            <video class="product-preview__img"
+                                   src="@previewSrc"
+                                   autoplay muted loop playsinline preload="metadata"
+                                   controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"
+                                   disablepictureinpicture
+                                   oncontextmenu="return false"></video>
+                        }
+                        else
+                        {
+                            <img src="@previewSrc" alt="Preview" class="product-preview__img" />
+                        }
+                    </div>
+                    <div class="p-2 text-muted small">
+                        Current product media
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/product-edit.js" asp-append-version="true"></script>
+}
