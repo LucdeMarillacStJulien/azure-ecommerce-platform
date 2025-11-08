@@ -1,0 +1,143 @@
+﻿@model IEnumerable<ST10382638_CLDV_POE.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+    ViewData["Subtitle"] = "Manage customer profiles in Azure Table Storage";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"]</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New Customer
+        </a>
+    </div>
+</div>
+
+
+
+<form method="get" asp-controller="Customer" asp-action="Index" class="mb-3 search-card">
+    <div class="input-group">
+        <input name="id" type="text" class="form-control"
+               placeholder="Enter Customer ID (RowKey)"
+               value="@(Context.Request.Query["id"])">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+    <small class="input-hint">Leave empty to view all customers.</small>
+</form>
+
+@if (!string.IsNullOrEmpty(ViewBag.Message as string))
+{
+    <div class="alert-soft alert-soft-warning mt-2" role="status" aria-live="polite">
+        <i class="bi bi-exclamation-triangle-fill icon"></i> @ViewBag.Message
+    </div>
+    <br />
+}
+
+<div class="glass-card p-3">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty">
+            <i class="bi bi-people icon"></i>
+            <div>No customers yet.</div>
+            <div class="mt-2">
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Add Customer
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+
+
+        <div class="table-responsive">
+            <table class="table table-neon table-compact align-middle">
+                <thead class="table-head-sticky">
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th class="d-none d-md-table-cell">Date of Birth</th>
+                        <th class="text-center">Age</th>
+                        <th>Email</th>
+                        <th class="d-none d-lg-table-cell">Phone</th>
+                        <th class="d-none d-xl-table-cell">City</th>
+                        <th class="d-none d-xl-table-cell">Country</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        var dob = c.DOB.Date;
+                        var today = DateTime.Today;
+                        var age = today.Year - dob.Year;
+                        if (dob > today.AddYears(-age)) age--;
+                        <tr>
+                            <td>@c.CustomerId</td>
+                            <td>@c.FirstName @c.LastName</td>
+
+                            <td class="d-none d-md-table-cell">
+                                @c.DOB.ToString("yyyy-MM-dd")
+                            </td>
+
+                            <td class="text-center">@age</td>
+
+                            <td>
+                                <a href="mailto:@c.Email">@c.Email</a>
+                            </td>
+
+                            <td class="d-none d-lg-table-cell">
+                                @c.PhoneNumber
+                            </td>
+
+                            <td class="d-none d-lg-table-cell">
+                                @c.Company
+                            </td>
+
+                            <td class="d-none d-xl-table-cell">
+                                @c.City, @c.Country
+                            </td>
+
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@c.CustomerId" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-confirm-delete
+                                            data-delete-url="@Url.Action("Delete", new { id = c.CustomerId })"
+                                            data-item-label="@($"{c.FirstName} {c.LastName}")">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-2 text-muted small">
+            <i class="bi bi-sliders me-1"></i>Long columns are truncated. Open <strong>Details</strong> to see full info
+            (Address, State/Province, Zip) which we hide here to keep the list compact.
+        </div>
+    }
+</div>
+
+<partial name="_ConfirmDeleteModal" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/delete.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/delete.js" asp-append-version="true"></script>
+}

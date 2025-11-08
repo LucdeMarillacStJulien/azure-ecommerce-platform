@@ -431,3 +431,33 @@
     display: block;
     margin-top: .4rem;
 }
+
+.form-control {
+    background: var(--card-bg) !important;
+    color: #00E5FF !important; /* Tron Blue */
+    border: 1px solid var(--card-border);
+}
+
+    .form-control:focus {
+        background: var(--card-bg) !important;
+        color: #00E5FF !important;
+        border: 1px solid var(--accent);
+        box-shadow: none !important;
+    }
+
+/* ✅ Fix paste/autofill flash (Chrome, Edge, Opera) */
+input.form-control:-webkit-autofill,
+input.form-control:-webkit-autofill:hover,
+input.form-control:-webkit-autofill:focus,
+input.form-control:-webkit-autofill:active {
+    -webkit-text-fill-color: #00E5FF !important; /* Keep Tron blue text */
+    caret-color: #00E5FF !important;
+    box-shadow: 0 0 0px 1000px var(--card-bg) inset !important; /* Force background */
+    transition: background-color 9999s ease-in-out 0s; /* Prevent flash */
+}
+
+/* ✅ Fix paste highlight (no white flash) */
+.form-control::selection {
+    background: rgba(0,229,255,0.35) !important; /* Tron blue highlight glow */
+    color: #00E5FF !important;
+}

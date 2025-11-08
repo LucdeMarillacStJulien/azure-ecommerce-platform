@@ -1,39 +1,47 @@
 ﻿@{
     ViewData["Title"] = "Login";
-    var returnUrl = (string?)ViewData["ReturnUrl"] ?? "";
 }
 
-<section class="container my-5" style="max-width: 520px;">
-    <div class="card shadow-sm rounded-4 p-4">
-        <h1 class="h4 mb-3 text-center">Sign in</h1>
+<div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
+
+    <div class="glass-card" style="max-width:420px; width:100%; padding:2rem;">
+
+        <h2 class="text-center mb-4" style="color:var(--text);">
+            Sign In
+        </h2>
 
         @if (!ViewData.ModelState.IsValid)
         {
-            <div class="alert alert-danger">Invalid email or password.</div>
+            <div class="alert-soft alert-soft-warning mb-3">
+                Invalid email or password.
+            </div>
         }
 
-        <form method="post" asp-action="Login" asp-controller="Account">
-            <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <form method="post" asp-action="Login" asp-controller="Account" class="form-card">
 
             <div class="mb-3">
                 <label class="form-label">Email</label>
-                <input name="email" type="email" class="form-control" required />
+                <input type="email" name="email" class="form-control" required />
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="form-label">Password</label>
-                <input name="password" type="password" class="form-control" required />
+                <input type="password" name="password" class="form-control" required />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100 mb-3">
+                Login
+            </button>
+
+            <div class="text-center">
+                <a asp-controller="Customer" asp-action="Register" class="btn btn-outline-light w-100">
+                    Create Customer Account
+                </a>
+            </div>
+
         </form>
-
-        <hr class="my-4" />
-
-        <div class="text-center">
-            <a asp-controller="Customer" asp-action="Register" class="btn btn-outline-secondary">
-                New customer? Create a profile
-            </a>
-        </div>
     </div>
-</section>
+
+</div>
+
+
