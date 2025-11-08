@@ -13,6 +13,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using ST10382638_CLDV_POE.Data;
 using ST10382638_CLDV_POE.Models;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -28,14 +29,16 @@ public class TableWriteFunction
 {
     private readonly ILogger<TableWriteFunction> _logger;
     private readonly IConfiguration _config;
+    private readonly AppDbContext _context;
 
     /// <summary>
     /// Constructor for dependency injection.
     /// </summary>
-    public TableWriteFunction(ILogger<TableWriteFunction> logger, IConfiguration config)
+    public TableWriteFunction(ILogger<TableWriteFunction> logger, IConfiguration config, AppDbContext context)
     {
         _logger = logger;
         _config = config;
+        _context = context;
     }
 
     /// <summary>
@@ -58,7 +61,10 @@ public class TableWriteFunction
 
         if (tableName.Equals("Customer"))
         {
-            
+            Customer? customer = JsonSerializer.Deserialize<Customer>(body, options);
+            _context.Customer.Add(customer);
+            await _context.SaveChangesAsync();
+            await response.WriteStringAsync($"Customer {customer.FirstName} {customer.LastName} processed.");
         }
         else
         {

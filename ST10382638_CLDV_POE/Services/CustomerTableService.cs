@@ -23,12 +23,15 @@ namespace ST10382638_CLDV_POE.Services
     /// </summary>
     public class CustomerTableService
     {
-        private readonly TableClient _tableClient;
         private readonly string _tableName = "Customer";
         
-        IConfiguration _config;
+        private readonly IConfiguration _config;
 
-        
+        public CustomerTableService(IConfiguration config)
+        {
+            _config = config;
+        }
+
 
         //------------------------------------------------------------------------------------------------------------------------//
         /// <summary>

@@ -92,38 +92,7 @@ using (var scope = app.Services.CreateScope())
     }
 
 
-    // 3) Seed Default Customer (for Login)
-    if (!db.User.Any(u => u.Email == "customer@demo.local"))
-    {
-        var customerUser = new User
-        {
-            Email = "customer@demo.local",
-            Password = "cust123"  // NO HASHING
-        };
-        db.User.Add(customerUser);
-        db.SaveChanges();
-
-        db.UserRole.Add(new UserRole { UserId = customerUser.UserId, RoleId = customerRoleId });
-        db.SaveChanges();
-
-        db.Customer.Add(new Customer
-        {
-            UserId = customerUser.UserId,
-            FirstName = "Demo",
-            LastName = "Customer",
-            DOB = new DateTime(1999, 1, 1),
-            PhoneNumber = "0710000000",
-            Email = "customer@demo.local",
-            Company = "Demo Corp",
-            AddressLine1 = "123 Demo Road",
-            AddressLine2 = "Unit A",
-            City = "Cape Town",
-            State = "Western Cape",
-            ZipCode = "8001",
-            Country = "South Africa"
-        });
-        db.SaveChanges();
-    }
+    
 }
 
     app.MapControllerRoute(

@@ -48,6 +48,19 @@ namespace ST10382638_CLDV_POE.Models
         [Display(Name = "Date of Birth")]
         public DateTime DOB { get; set; }
 
+        [NotMapped]
+        [Required]
+        [EmailAddress]
+        public string Email
+        {
+            get => User?.Email;
+            set
+            {
+                if (User == null)
+                    User = new User();
+                User.Email = value ?? string.Empty;
+            }
+        }
         /// <summary>
         /// Contact phone number.
         /// </summary>
@@ -55,13 +68,6 @@ namespace ST10382638_CLDV_POE.Models
         [Phone]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
-
-        /// <summary>
-        /// Contact email address.
-        /// </summary>
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
 
         /// <summary>
         /// Company/Organization name.
