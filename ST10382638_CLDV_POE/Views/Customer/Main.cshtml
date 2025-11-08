@@ -1,10 +1,53 @@
-﻿@{
-    ViewData["Title"] = "Customer Home";
+﻿@model IEnumerable<ST10382638_CLDV_POE.Models.Product>
+
+@{
+    ViewData["Title"] = "Shop";
+    ViewData["Subtitle"] = "Choose a product to view details";
 }
 
-<section class="container my-5">
-    <div class="card p-4 rounded-4">
-        <h1 class="h4 mb-2">Login successful</h1>
-        <p class="mb-0">Welcome. Customer page placeholder.</p>
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"]</p>
     </div>
-</section>
+</div>
+
+@if (!(Model?.Any() ?? false))
+{
+    <section class="container my-4">
+        <div class="glass-card p-4 rounded-4 text-center">
+            <p class="mb-0">No products available right now.</p>
+        </div>
+    </section>
+}
+else
+{
+    <!-- SCOPE STARTS HERE -->
+    <section class="shop-catalog container my-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            @foreach (var p in Model)
+            {
+                var fallbackImg = Url.Content("~/img/placeholder-product.png");
+                var imgSrc = string.IsNullOrWhiteSpace(p.ImageUrl) ? fallbackImg : p.ImageUrl;
+
+                <div class="col">
+                    <a asp-action="Shop" asp-route-id="@p.RowKey" class="text-decoration-none d-block h-100">
+                        <div class="glass-card product-card h-100 p-0 rounded-4 overflow-hidden d-flex flex-column">
+                            <div style="height:280px; overflow:hidden; border-bottom:1px solid rgba(255,255,255,0.1);">
+                                <img src="@imgSrc" alt="@p.ProductName" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                            <div class="p-3 d-flex flex-column gap-1 text-white">
+                                <h2 class="h6 mb-1">@p.ProductName</h2>
+                                <p class="mb-2 text-muted small">@p.Description</p>
+                                <div class="d-flex align-items-center justify-content-between mt-auto">
+                                    <span class="badge">@p.Category</span>
+                                    <span class="fw-semibold">R @p.Price.ToString("0.00")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}

@@ -9,6 +9,7 @@ using ST10382638_CLDV_POE.Services;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ST10382638_CLDV_POE.Controllers
 {
@@ -18,18 +19,30 @@ namespace ST10382638_CLDV_POE.Controllers
     {
         private readonly AppDbContext _context;
         private readonly CustomerTableService _tableStorage;
+        private readonly ProductTableService _productTable;
 
-        public CustomerController(AppDbContext context, CustomerTableService tableStorage)
+        public CustomerController(AppDbContext context, CustomerTableService tableStorage, ProductTableService productTableService)
         {
             _context = context;
             _tableStorage = tableStorage;
+            _productTable = productTableService;
         }
 
         [Authorize(Roles = "Customer")]
-        public IActionResult Main()
+        public async Task<IActionResult> Main()
         {
+            var all = await _productTable.GetAllProductsAsync();
+            var available = all.Where(p => p.IsAvailable).ToList();
+            return View(available);
+        }
 
-            return View();
+        public async Task<IActionResult> Shop(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return RedirectToAction(nameof(Main));
+
+            var product = await _productTable.GetProductByIdAsync(id);
+            return View(product);
         }
 
         [Authorize(Roles = "Admin")]

@@ -461,3 +461,27 @@ input.form-control:-webkit-autofill:active {
     background: rgba(0,229,255,0.35) !important; /* Tron blue highlight glow */
     color: #00E5FF !important;
 }
+
+/* Product cards scoped only to the Customer/Main Shop */
+.shop-catalog .product-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    outline: 2px solid transparent;
+    transition: transform .35s ease, box-shadow .35s ease, outline .35s ease;
+}
+
+    /* Hover effect — Royal Blue theme */
+    .shop-catalog .product-card:hover {
+        transform: translateY(-6px);
+        outline: 2px solid rgba(52, 102, 204, 0.95); /* Royal Blue Border */
+        box-shadow: 0 12px 26px rgba(52, 102, 204, 0.45); /* Royal Blue Glow */
+        cursor: pointer;
+    }
+
+        /* Optional subtle text glow for refinement */
+        .shop-catalog .product-card:hover h2,
+        .shop-catalog .product-card:hover .badge,
+        .shop-catalog .product-card:hover .fw-semibold {
+            text-shadow: 0 0 6px rgba(52, 102, 204, 0.75);
+        }
