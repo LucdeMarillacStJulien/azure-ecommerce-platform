@@ -7,7 +7,7 @@ namespace ST10382638_CLDV_POE.Controllers
     public class Customer : Controller
     {
         [Authorize(Roles = "Customer")]
-        public IActionResult Index()
+        public IActionResult Main()
         {
             return View();
         }
