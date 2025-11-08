@@ -26,8 +26,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         o.AccessDeniedPath = "/Account/AccessDenied";
         o.SlidingExpiration = true;
         o.Cookie.Name = "lcm_auth";
-        o.Cookie.HttpOnly = true;
-        o.Cookie.SameSite = SameSiteMode.Lax;
         o.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
@@ -52,7 +50,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();
 app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
@@ -89,6 +87,6 @@ using (var scope = app.Services.CreateScope())
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+        pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

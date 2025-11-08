@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    var returnUrl = (string?)ViewData["ReturnUrl"] ?? "";
+}
+
+<section class="container my-5" style="max-width: 520px;">
+    <div class="card shadow-sm rounded-4 p-4">
+        <h1 class="h4 mb-3 text-center">Sign in</h1>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">Invalid email or password.</div>
+        }
+
+        <form method="post" asp-action="Login" asp-controller="Account">
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input name="email" type="email" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input name="password" type="password" class="form-control" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <hr class="my-4" />
+
+        <div class="text-center">
+            <a asp-controller="Customer" asp-action="Register" class="btn btn-outline-secondary">
+                New customer? Create a profile
+            </a>
+        </div>
+    </div>
+</section>
