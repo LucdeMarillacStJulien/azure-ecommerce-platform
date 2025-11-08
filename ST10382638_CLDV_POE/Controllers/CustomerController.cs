@@ -59,7 +59,9 @@ namespace ST10382638_CLDV_POE.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Next(Customer customer, string? source, string? returnUrl)
         {
-
+            var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
+            if (!User.IsInRole("Admin") && isRegister)
+                return Forbid();
 
             ModelState.Remove(nameof(customer.UserId));
             ModelState.Remove(nameof(customer.User));
@@ -68,25 +70,32 @@ namespace ST10382638_CLDV_POE.Controllers
 
             if (!ModelState.IsValid)
             {
+                ViewBag.Source = source;
+                ViewBag.ReturnUrl = returnUrl;
                 Console.WriteLine("Model not valid");
                 return View("Create", customer);
             }
 
 
             TempData["PendingCustomer"] = JsonSerializer.Serialize(customer);
-            TempData.Keep("PendingCustomer");
+            TempData["Source"] = source ?? "";
+            TempData["ReturnUrl"] = returnUrl ?? Url.Action("Login", "Account");
+            TempData.Keep();
             return RedirectToAction(nameof(Password));
         }
 
         [HttpGet]
         public IActionResult Password()
         {
-            if (!TempData.TryGetValue("PendingCustomer", out var jsonObj) || jsonObj is null)
-                return RedirectToAction(nameof(Create));
+            var source = TempData["Source"] as string ?? "";
+            var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
+            if(!User.IsInRole("Admin") && isRegister)
+                return Forbid();
 
-            TempData.Keep("PendingCustomer");
-            TempData.Keep("Source");
-            TempData.Keep("ReturnUrl");
+            if (!TempData.TryGetValue("PendingCustomer", out var jsonObj) || jsonObj is null)
+                return RedirectToAction(nameof(Create), new {source});
+
+            TempData.Keep();
             return View(new PasswordVm());
         }
 
@@ -94,51 +103,44 @@ namespace ST10382638_CLDV_POE.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Password(PasswordVm vm)
         {
-            if (!TempData.TryGetValue("PendingCustomer", out var jsonObj) || jsonObj is null)
-                return RedirectToAction(nameof(Create));
+            var source = TempData["Source"] as string ?? "";
+            var returnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Login", "Account");
+            var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
+            if (!User.IsInRole("Admin") && !isRegister)
+                return Forbid();
+
+            if (!TempData.TryGetValue("PendingCustomer", out var jsonObj))
+                return RedirectToAction(nameof(Create), new { source });
 
             var pendingCustomer = JsonSerializer.Deserialize<Customer>(jsonObj.ToString()!);
 
             var errors = ValidatePassword(vm.Password, vm.ConfirmPassword);
             foreach (var e in errors) ModelState.AddModelError(string.Empty, e);
-            if (!ModelState.IsValid) { TempData.Keep("PendingCustomer"); return View(vm); }
+            if (!ModelState.IsValid) { TempData.Keep(); return View(vm); }
 
             // build user from wrapper email
-            var user = pendingCustomer.User ?? new User();
-            user.Email = pendingCustomer.Email ?? string.Empty;
-
-            // ✅ set password (hash if you have a hasher)
-            user.Password = vm.Password;                     // or Hash(vm.Password)
+            var user = pendingCustomer.User ?? new User { Email = pendingCustomer.Email ?? string.Empty };
+            user.Password = vm.Password; // plug in hashing later
 
             _context.User.Add(user);
-            await _context.SaveChangesAsync();               // user.UserId generated
+            await _context.SaveChangesAsync();
 
-            // role link
             var customerRole = await _context.Role.FirstAsync(r => r.Name == "Customer");
             _context.UserRole.Add(new UserRole { UserId = user.UserId, RoleId = customerRole.RoleId });
             await _context.SaveChangesAsync();
 
-            // set FK and avoid duplicate user insert
             pendingCustomer.UserId = user.UserId;
             pendingCustomer.User = null;
 
-            // if you also mirror to Table Storage
             await _tableStorage.InsertCustomerAsync(pendingCustomer);
 
-            var source = TempData["Source"] as string ?? "";
-            var returnUrl = TempData["ReturnUrl"] as string ?? "";
-
+            // clean TempData
             TempData.Remove("PendingCustomer");
             TempData.Remove("Source");
             TempData.Remove("ReturnUrl");
 
-
-            if (string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase) &&
-                !string.IsNullOrWhiteSpace(returnUrl) &&
-                Url.IsLocalUrl(returnUrl))
-            {
+            if (isRegister && !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
-            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -147,7 +149,8 @@ namespace ST10382638_CLDV_POE.Controllers
         [AllowAnonymous]
         public IActionResult Register()
         {
-            return View();
+            var returnUrl = Url.Action("Login", "Account");
+            return RedirectToAction(nameof(Create), new { source = "Register", returnUrl });
         }
 
         private static List<string> ValidatePassword(string? pwd, string? confirm)
