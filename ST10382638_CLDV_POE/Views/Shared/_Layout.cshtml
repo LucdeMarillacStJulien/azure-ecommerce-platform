@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.EntityFrameworkCore
+@using ST10382638_CLDV_POE.Data
+@inject AppDbContext Db
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -67,15 +71,11 @@
                     </button>
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cart" asp-action="Index" title="Cart">
-                                    <i class="bi bi-bag"></i>
-                                    <span class="visually-hidden">Cart</span>
-                                </a>
-                            </li>
+
+                            <a asp-controller="Cart" asp-action="Index" class="nav-link">
+                                <i class="bi bi-cart fs-5"></i>
+                            </a>
+
                         </ul>
                     </div>
                 }

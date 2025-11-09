@@ -523,3 +523,62 @@ input.form-control:-webkit-autofill:active {
     .shop-view .shop-dl dd {
         margin: 0;
     }
+
+/* ===== Cart view (scoped) ===== */
+.cart-view .cart-table thead th {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--card-border);
+}
+
+.cart-view .cart-table tbody tr + tr td {
+    border-top: 1px solid var(--card-border);
+}
+
+.cart-view .cart-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    display: block;
+    border-radius: .5rem;
+    box-shadow: var(--shadow);
+}
+
+.cart-view .cart-qty {
+    width: 80px;
+    padding-top: .4rem;
+    padding-bottom: .4rem;
+}
+
+.cart-view .btn-sm {
+    padding: .35rem .6rem;
+    border-radius: .5rem;
+}
+
+
+.navbar .badge {
+    background: var(--accent);
+    color: var(--on-accent);
+    min-width: 20px;
+}
+
+/* === Cart Row Hover Match Product Display === */
+
+.cart-view .cart-table tbody tr {
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    cursor: pointer;
+}
+
+    .cart-view .cart-table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 10px var(--accent-glow);
+        background: rgba(255,255,255,0.06);
+        border-color: var(--accent);
+    }
+
+/* Maintain narrow row height */
+.cart-view .cart-table td,
+.cart-view .cart-table th {
+    padding-top: .45rem !important;
+    padding-bottom: .45rem !important;
+}
+

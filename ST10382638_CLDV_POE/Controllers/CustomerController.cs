@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using ST10382638_CLDV_POE.Data;
 using ST10382638_CLDV_POE.Models;
 using ST10382638_CLDV_POE.Services;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ST10382638_CLDV_POE.Controllers
 {
-
     [Authorize(Roles = "Customer, Admin")]
     public class CustomerController : Controller
     {
@@ -52,12 +47,16 @@ namespace ST10382638_CLDV_POE.Controllers
             return View(customer);
         }
 
+        // ---------- REGISTRATION / CREATE PIPELINE ----------
+
         [AllowAnonymous]
         public ActionResult Create(string? source = null, string? returnUrl = null)
         {
             var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
-            if(!User.IsInRole("Admin") && isRegister)
-                return Forbid();
+
+            // Only Admins may create when NOT in Register flow
+            if (!isRegister && !User.IsInRole("Admin"))
+                return User.Identity?.IsAuthenticated == true ? Forbid() : Challenge();
 
             ViewBag.Source = source;
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl)
@@ -73,9 +72,11 @@ namespace ST10382638_CLDV_POE.Controllers
         public IActionResult Next(Customer customer, string? source, string? returnUrl)
         {
             var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
-            if (!User.IsInRole("Admin") && isRegister)
-                return Forbid();
 
+            if (!isRegister && !User.IsInRole("Admin"))
+                return User.Identity?.IsAuthenticated == true ? Forbid() : Challenge();
+
+            // model cleanup
             ModelState.Remove(nameof(customer.UserId));
             ModelState.Remove(nameof(customer.User));
             ModelState.Remove("User.Password");
@@ -85,10 +86,8 @@ namespace ST10382638_CLDV_POE.Controllers
             {
                 ViewBag.Source = source;
                 ViewBag.ReturnUrl = returnUrl;
-                Console.WriteLine("Model not valid");
                 return View("Create", customer);
             }
-
 
             TempData["PendingCustomer"] = JsonSerializer.Serialize(customer);
             TempData["Source"] = source ?? "";
@@ -98,29 +97,33 @@ namespace ST10382638_CLDV_POE.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Password()
         {
             var source = TempData["Source"] as string ?? "";
             var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
-            if(!User.IsInRole("Admin") && isRegister)
-                return Forbid();
+
+            if (!isRegister && !User.IsInRole("Admin"))
+                return User.Identity?.IsAuthenticated == true ? Forbid() : Challenge();
 
             if (!TempData.TryGetValue("PendingCustomer", out var jsonObj) || jsonObj is null)
-                return RedirectToAction(nameof(Create), new {source});
+                return RedirectToAction(nameof(Create), new { source });
 
             TempData.Keep();
             return View(new PasswordVm());
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Password(PasswordVm vm)
         {
             var source = TempData["Source"] as string ?? "";
             var returnUrl = TempData["ReturnUrl"] as string ?? Url.Action("Login", "Account");
             var isRegister = string.Equals(source, "Register", StringComparison.OrdinalIgnoreCase);
-            if (!User.IsInRole("Admin") && !isRegister)
-                return Forbid();
+
+            if (!isRegister && !User.IsInRole("Admin"))
+                return User.Identity?.IsAuthenticated == true ? Forbid() : Challenge();
 
             if (!TempData.TryGetValue("PendingCustomer", out var jsonObj))
                 return RedirectToAction(nameof(Create), new { source });
@@ -132,8 +135,8 @@ namespace ST10382638_CLDV_POE.Controllers
             if (!ModelState.IsValid) { TempData.Keep(); return View(vm); }
 
             // build user from wrapper email
-            var user = pendingCustomer.User ?? new User { Email = pendingCustomer.Email ?? string.Empty };
-            user.Password = vm.Password; // plug in hashing later
+            var user = pendingCustomer!.User ?? new User { Email = pendingCustomer.Email ?? string.Empty };
+            user.Password = vm.Password; // TODO: hash
 
             _context.User.Add(user);
             await _context.SaveChangesAsync();
@@ -147,7 +150,7 @@ namespace ST10382638_CLDV_POE.Controllers
 
             await _tableStorage.InsertCustomerAsync(pendingCustomer);
 
-            // clean TempData
+            // clear TempData
             TempData.Remove("PendingCustomer");
             TempData.Remove("Source");
             TempData.Remove("ReturnUrl");
@@ -158,13 +161,14 @@ namespace ST10382638_CLDV_POE.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         [AllowAnonymous]
         public IActionResult Register()
         {
             var returnUrl = Url.Action("Login", "Account");
             return RedirectToAction(nameof(Create), new { source = "Register", returnUrl });
         }
+
+        // ----------------------------------------------------
 
         private static List<string> ValidatePassword(string? pwd, string? confirm)
         {

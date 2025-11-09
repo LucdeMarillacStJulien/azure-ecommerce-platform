@@ -48,12 +48,16 @@
                 <hr class="my-3" />
 
                 <div class="d-flex align-items-center gap-2">
-                    <label for="qty" class="form-label mb-0">Qty</label>
-                    <input id="qty" name="qty" class="form-control text-center shop-qty"
-                           type="number" min="1" value="1" />
-                    <button type="button" class="btn btn-primary flex-grow-1" disabled="@(inStock ? false : true)">
-                        Add to cart
-                    </button>
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="productId" value="@Model!.RowKey" />
+                        <input type="hidden" name="productName" value="@Model!.ProductName" />
+                        <input type="hidden" name="unitPrice" value="@Convert.ToDecimal(Model!.Price).ToString("0.00")" />
+                        <input type="hidden" name="imageUrl" value="@Model!.ImageUrl" />
+                        <label for="qty" class="form-label mb-0">Qty</label>
+                        <input id="qty" name="qty" class="form-control text-center shop-qty" type="number" min="1" value="1" />
+                        <button type="submit" class="btn btn-primary" @( (Model.StockQuantity > 0) ? null : "disabled")>Add to cart</button>
+                        @Html.AntiForgeryToken()
+                    </form>
                 </div>
             </div>
 

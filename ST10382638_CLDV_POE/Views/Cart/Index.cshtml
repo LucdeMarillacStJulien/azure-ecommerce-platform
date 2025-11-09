@@ -1,0 +1,82 @@
+﻿@model IEnumerable<ST10382638_CLDV_POE.Models.CartItem>
+@{
+    ViewData["Title"] = "Cart";
+    var total = Model.Sum(i => i.UnitPrice * i.Quantity);
+}
+
+<section class="container my-4 cart-view">
+    <header class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="mb-0">Cart</h1>
+        <a asp-controller="Customer" asp-action="Main" class="btn btn-outline-light">Continue shopping</a>
+    </header>
+
+    @if (!Model.Any())
+    {
+        <div class="glass-card p-4 text-center">
+            <p class="mb-0">Your cart is empty.</p>
+        </div>
+    }
+    else
+    {
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle cart-table">
+                    <colgroup>
+                        <col style="width:76px" />      @* thumbnail *@
+                        <col />                          @* item name *@
+                        <col style="width:140px" />      @* price *@
+                        <col style="width:200px" />      @* qty + update *@
+                        <col style="width:140px" />      @* subtotal *@
+                        <col style="width:110px" />      @* remove *@
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th></th>
+                            <th class="text-end">Price</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(i.ImageUrl))
+                                    {
+                                        <img src="@i.ImageUrl" alt="@i.ProductName" class="cart-thumb" />
+                                    }
+                                </td>
+                                <td class="fw-medium">@i.ProductName</td>
+                                <td class="text-end">R @i.UnitPrice.ToString("0.00")</td>
+                                <td class="text-center">
+                                    <form asp-action="Update" method="post" class="d-inline-flex align-items-center gap-2">
+                                        <input type="hidden" name="productId" value="@i.ProductId" />
+                                        <input type="number" name="qty" value="@i.Quantity" min="0" class="form-control cart-qty text-center" />
+                                        <button type="submit" class="btn btn-outline-light btn-sm">Update</button>
+                                        @Html.AntiForgeryToken()
+                                    </form>
+                                </td>
+                                <td class="text-end fw-semibold">R @( (i.UnitPrice * i.Quantity).ToString("0.00") )</td>
+                                <td class="text-end">
+                                    <form asp-action="Remove" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="@i.ProductId" />
+                                        <button type="submit" class="btn btn-outline-light btn-sm">Remove</button>
+                                        @Html.AntiForgeryToken()
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-end gap-3 mt-3">
+            <div class="fs-5">Total: <strong>R @total.ToString("0.00")</strong></div>
+            <a class="btn btn-primary" asp-controller="Checkout" asp-action="Index">Checkout</a>
+        </div>
+    }
+</section>
