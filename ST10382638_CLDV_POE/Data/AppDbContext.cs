@@ -12,5 +12,6 @@ namespace ST10382638_CLDV_POE.Data
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<Customer> Customer { get; set; }
         public DbSet<Admin> Admin { get; set; }
+        public DbSet<CartItem> CartItem { get; set; }
     }
 }

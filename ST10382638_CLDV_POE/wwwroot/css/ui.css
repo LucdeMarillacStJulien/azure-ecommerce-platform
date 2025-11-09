@@ -485,3 +485,41 @@ input.form-control:-webkit-autofill:active {
         .shop-catalog .product-card:hover .fw-semibold {
             text-shadow: 0 0 6px rgba(52, 102, 204, 0.75);
         }
+
+/* === Shop view (scoped) === */
+.shop-view .shop-media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+    .shop-view .shop-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+/* inputs and facts */
+.shop-view .shop-qty {
+    max-width: 110px;
+}
+
+.shop-view .shop-dl {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: .25rem .75rem;
+}
+
+    .shop-view .shop-dl dt {
+        color: var(--muted);
+        font-weight: 500;
+    }
+
+    .shop-view .shop-dl dd {
+        margin: 0;
+    }
