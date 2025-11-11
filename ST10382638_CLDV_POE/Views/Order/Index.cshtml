@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<ST10382638_CLDV_POE.Models.Order>
+
 @{
     ViewData["Title"] = "Orders";
     var q = Context.Request.Query["q"].ToString();
@@ -10,8 +11,13 @@
 
 <div class="page-head">
     <h1>All Orders</h1>
-    <form method="get" style="display:flex; gap:.75rem; flex-wrap:wrap;">
+</div>
+
+<!-- Search & Filters BELOW header -->
+<div class="search-card mb-3">
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
         <input class="form-control" type="text" name="q" value="@q" placeholder="Search Order or Customer Name" />
+
         <select class="form-select select-contrast" name="status">
             <option value="">Status: All</option>
             @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
@@ -19,8 +25,9 @@
                 <option value="@s" selected="@(status == s ? "selected" : null)">@s</option>
             }
         </select>
-        <button class="btn btn-sm btn-primary" type="submit" title="Filter">
-            <i class="bi bi-search" aria-hidden="true"></i>
+
+        <button class="btn btn-primary" type="submit" title="Filter">
+            <i class="bi bi-search"></i>
         </button>
     </form>
 </div>
@@ -48,7 +55,8 @@ else
                 @foreach (var o in Model.OrderByDescending(x => x.OrderDate))
                 {
                     var nm = (int.TryParse(o.CustomerId, out var cid) && names.ContainsKey(cid))
-                    ? names[cid] : "Unknown Customer";
+                    ? names[cid]
+                    : "Unknown Customer";
 
                     <tr>
                         <td class="truncate-28">@o.RowKey</td>
@@ -58,7 +66,6 @@ else
                         <td class="text-end">R @o.TotalPrice.ToString("0.00")</td>
 
                         <td>
-                            @* Use your theme badge + color classes, add only Bootstrap spacing + pill *@
                             @if (o.Status == "Placed")
                             {
                                 <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
@@ -83,12 +90,13 @@ else
 
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-2 align-items-center">
+
                                 <a class="btn btn-sm btn-outline-light"
                                    asp-action="AdminDetails"
                                    asp-route-id="@o.RowKey"
                                    asp-route-returnUrl="@returnUrl"
                                    title="Details">
-                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                    <i class="bi bi-eye"></i>
                                 </a>
 
                                 <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 align-items-center">
@@ -104,9 +112,10 @@ else
                                     </select>
 
                                     <button type="submit" class="btn btn-sm btn-outline-light" title="Save">
-                                        <i class="bi bi-check-lg" aria-hidden="true"></i>
+                                        <i class="bi bi-check-lg"></i>
                                     </button>
                                 </form>
+
                             </div>
                         </td>
                     </tr>
