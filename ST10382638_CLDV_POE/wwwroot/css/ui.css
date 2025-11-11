@@ -582,3 +582,52 @@ input.form-control:-webkit-autofill:active {
     padding-bottom: .45rem !important;
 }
 
+/* Order Status Colors */
+.status-placed {
+    background-color: #4da3ff33;
+    color: #4da3ff;
+}
+
+.status-processing {
+    background-color: #ffdd5733;
+    color: #ffdd57;
+}
+
+.status-completed {
+    background-color: #52ffa433;
+    color: #52ffa4;
+}
+
+.status-cancelled {
+    background-color: #ff6b6b33;
+    color: #ff6b6b;
+}
+
+/* --- Action buttons for Order pages --- */
+.btn-glass {
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    padding: .45rem .9rem;
+    border-radius: .75rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+    .btn-glass:hover {
+        background: rgba(255,255,255,0.12);
+        box-shadow: 0 0 12px rgba(124,240,255,0.25);
+        transform: translateY(-1px);
+    }
+
+/* Save button gets accent tint */
+.btn-glass-green {
+    border-color: rgba(48,209,88,0.45);
+    color: #52ffa4;
+}
+
+    .btn-glass-green:hover {
+        background: rgba(48,209,88,0.12);
+        box-shadow: 0 0 14px rgba(48,209,88,0.35);
+    }

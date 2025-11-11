@@ -1,0 +1,7 @@
+﻿@{
+    ViewData["Title"] = "Order Confirmation";
+    var orderId = (string?)ViewData["OrderId"] ?? "";
+}
+<h2>Order placed</h2>
+<p>Your Order ID: <strong>@orderId</strong></p>
+<a asp-controller="Product" asp-action="Index">Continue shopping</a>

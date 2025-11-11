@@ -8,6 +8,7 @@
 // https://www.w3schools.com/bootstrap/bootstrap_ver.asp
 // https://stackoverflow.com/questions
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ST10382638_CLDV_POE.Models;
@@ -19,6 +20,8 @@ namespace ST10382638_CLDV_POE.Controllers
     /// Handles Product CRUD with image/video upload to Blob Storage
     /// and corresponding Azure Table Storage persistence.
     /// </summary>
+    ///
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly ProductTableService _tableStorage;

@@ -1,0 +1,117 @@
+﻿@model IEnumerable<ST10382638_CLDV_POE.Models.Order>
+@{
+    ViewData["Title"] = "Orders";
+    var q = Context.Request.Query["q"].ToString();
+    var status = Context.Request.Query["status"].ToString();
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var names = ViewData["CustomerNames"] as System.Collections.Generic.IDictionary<int, string>
+                ?? new Dictionary<int, string>();
+}
+
+<div class="page-head">
+    <h1>All Orders</h1>
+    <form method="get" style="display:flex; gap:.75rem; flex-wrap:wrap;">
+        <input class="form-control" type="text" name="q" value="@q" placeholder="Search Order or Customer Name" />
+        <select class="form-select select-contrast" name="status">
+            <option value="">Status: All</option>
+            @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+            {
+                <option value="@s" selected="@(status == s ? "selected" : null)">@s</option>
+            }
+        </select>
+        <button class="btn btn-sm btn-primary" type="submit" title="Filter">
+            <i class="bi bi-search" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">No orders found.</div>
+}
+else
+{
+    <div class="search-card">
+        <table class="table table-neon">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th class="text-end">Items</th>
+                    <th class="text-end">Total</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.OrderByDescending(x => x.OrderDate))
+                {
+                    var nm = (int.TryParse(o.CustomerId, out var cid) && names.ContainsKey(cid))
+                    ? names[cid] : "Unknown Customer";
+
+                    <tr>
+                        <td class="truncate-28">@o.RowKey</td>
+                        <td class="truncate-28">@nm</td>
+                        <td>@($"{o.OrderDate:yyyy-MM-dd HH:mm}")</td>
+                        <td class="text-end">@o.ItemCount</td>
+                        <td class="text-end">R @o.TotalPrice.ToString("0.00")</td>
+
+                        <td>
+                            @* Use your theme badge + color classes, add only Bootstrap spacing + pill *@
+                            @if (o.Status == "Placed")
+                            {
+                                <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
+                            }
+                            else if (o.Status == "Processing")
+                            {
+                                <span class="badge-soft status-processing rounded-pill px-2 py-1">Processing</span>
+                            }
+                            else if (o.Status == "Completed")
+                            {
+                                <span class="badge-soft status-completed rounded-pill px-2 py-1">Completed</span>
+                            }
+                            else if (o.Status == "Cancelled")
+                            {
+                                <span class="badge-soft status-cancelled rounded-pill px-2 py-1">Cancelled</span>
+                            }
+                            else
+                            {
+                                <span class="badge-soft rounded-pill px-2 py-1">@o.Status</span>
+                            }
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 align-items-center">
+                                <a class="btn btn-sm btn-outline-light"
+                                   asp-action="AdminDetails"
+                                   asp-route-id="@o.RowKey"
+                                   asp-route-returnUrl="@returnUrl"
+                                   title="Details">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                </a>
+
+                                <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 align-items-center">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@o.RowKey" />
+                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                                    <select class="form-select select-contrast" name="status">
+                                        @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+                                        {
+                                            <option value="@s" selected="@(o.Status == s ? "selected" : null)">@s</option>
+                                        }
+                                    </select>
+
+                                    <button type="submit" class="btn btn-sm btn-outline-light" title="Save">
+                                        <i class="bi bi-check-lg" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

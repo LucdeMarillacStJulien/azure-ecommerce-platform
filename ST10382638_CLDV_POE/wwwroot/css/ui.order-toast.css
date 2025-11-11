@@ -1,0 +1,103 @@
+﻿/* All styles scoped under .ui-order-toast-* so nothing leaks */
+.ui-order-toast-root {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 2147483000; /* above modals if needed */
+    max-width: 360px;
+    font-family: inherit;
+}
+
+.ui-order-toast {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: .75rem;
+    align-items: start;
+    background: var(--ui-surface, rgba(17,17,17,.94));
+    color: var(--ui-text, #eaeaea);
+    border: 1px solid var(--ui-border, rgba(255,255,255,.15));
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    border-radius: 12px;
+    padding: .9rem 1rem;
+    backdrop-filter: blur(6px);
+}
+
+.ui-order-toast__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--ui-accent, #3b82f6), var(--ui-accent-2, #22d3ee));
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ui-order-toast__title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.ui-order-toast__meta {
+    margin: .2rem 0 0 0;
+    font-size: .85rem;
+    opacity: .85;
+    word-break: break-all;
+}
+
+.ui-order-toast__close {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    opacity: .7;
+}
+
+    .ui-order-toast__close:hover {
+        opacity: 1;
+    }
+
+@keyframes ui-order-toast-in {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes ui-order-toast-out {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+}
+
+.ui-order-toast-animate-in {
+    animation: ui-order-toast-in 240ms ease-out both;
+}
+
+.ui-order-toast-animate-out {
+    animation: ui-order-toast-out 200ms ease-in both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-order-toast-animate-in,
+    .ui-order-toast-animate-out {
+        animation: none;
+    }
+}

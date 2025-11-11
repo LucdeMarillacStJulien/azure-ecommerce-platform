@@ -1,0 +1,93 @@
+﻿@model ST10382638_CLDV_POE.Models.Order
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Order " + Model.RowKey;
+    var returnUrl = (ViewData["returnUrl"] as string) ?? Context.Request.Query["returnUrl"].ToString();
+    var customerName = ViewData["CustomerName"] as string;
+}
+<link rel="stylesheet" href="~/css/ui.css" />
+
+<div class="page-head">
+    <h1>Order @Model.RowKey</h1>
+    <div class="page-sub">Placed @($"{Model.OrderDate:yyyy-MM-dd HH:mm}")</div>
+
+    <form asp-action="UpdateStatus" method="post" style="display:flex; gap:.75rem;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.RowKey" />
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <select class="form-select select-contrast" name="status">
+            @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+            {
+                <option value="@s" selected="@(Model.Status == s ? "selected" : null)">@s</option>
+            }
+        </select>
+        <!-- match project: primary gradient button -->
+        <button class="btn btn-sm btn-primary">Update</button>
+    </form>
+</div>
+
+<div class="prose">
+    @if (!string.IsNullOrWhiteSpace(customerName))
+    {
+        <p><strong>Customer:</strong> @customerName</p>
+    }
+    <p><strong>Customer ID:</strong> @Model.CustomerId</p>
+    <p><strong>Total Items:</strong> @Model.ItemCount</p>
+    <p><strong>Order Total:</strong> R @Model.TotalPrice.ToString("0.00")</p>
+</div>
+
+@{
+    using var doc = JsonDocument.Parse(Model.ItemsJson ?? "[]");
+    var items = doc.RootElement.ValueKind == JsonValueKind.Array
+        ? doc.RootElement.EnumerateArray()
+        : Enumerable.Empty<JsonElement>();
+}
+
+<div class="search-card">
+    <!-- match project: neon table styling -->
+    <table class="table table-neon table-compact">
+        <thead>
+            <tr>
+                <th style="width:64px;">Image</th>
+                <th>Product</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Line Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var it in items)
+            {
+                var name = it.TryGetProperty("ProductName", out var n) && n.ValueKind == JsonValueKind.String ? n.GetString() : "";
+                var price = it.TryGetProperty("UnitPrice", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetDouble() : 0d;
+                var qty = it.TryGetProperty("Quantity", out var qEl) && qEl.ValueKind == JsonValueKind.Number ? qEl.GetInt32() : 0;
+                var image = it.TryGetProperty("ImageUrl", out var im) && im.ValueKind == JsonValueKind.String ? im.GetString() : "";
+                var total = price * qty;
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(image))
+                        {
+                            <img src="@image" class="thumb-64" />
+                        }
+                    </td>
+                    <td>@name</td>
+                    <td class="text-end">R @price.ToString("0.00")</td>
+                    <td class="text-end">@qty</td>
+                    <td class="text-end">R @total.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3">
+    <form asp-action="Index" asp-controller="Order" method="get">
+        <button type="submit" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-short me-1"></i> Back
+        </button>
+    </form>
+</div>
+
+
+
+

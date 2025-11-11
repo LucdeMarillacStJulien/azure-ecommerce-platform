@@ -49,25 +49,6 @@ namespace ST10382638_CLDV_POE.Models
         public string CustomerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// The ID of the product being purchased.
-        /// </summary>
-        [Required]
-        [Display(Name = "Product Id")]
-        public string ProductId { get; set; } = string.Empty;
-
-        /// <summary>
-        /// The price of one unit of the product.
-        /// </summary>
-        [Range(0, 1_000_000)]
-        public double UnitPrice { get; set; }
-
-        /// <summary>
-        /// Quantity of the product ordered.
-        /// </summary>
-        [Range(1, 1_000_000)]
-        public int Quantity { get; set; }
-
-        /// <summary>
         /// Total cost of the order (UnitPrice × Quantity).
         /// </summary>
         [Range(0, 10_000_000)]
@@ -85,6 +66,12 @@ namespace ST10382638_CLDV_POE.Models
         [Required]
         [StringLength(32)]
         public string Status { get; set; } = "Placed";
+
+        [Required]
+        public string ItemsJson { get; set; } = "[]";
+
+        [Range(0, 1_000_000)]
+        public int ItemCount { get; set; } 
     }
 }
 //------------------------------------------...ooo000 END OF FILE 000ooo...------------------------------------------------------//

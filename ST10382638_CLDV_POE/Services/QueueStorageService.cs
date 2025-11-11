@@ -58,7 +58,7 @@ namespace ST10382638_CLDV_POE.Services
 
             var opts = new JsonSerializerOptions { PropertyNamingPolicy = null }; // keep PascalCase
             var json = JsonSerializer.Serialize(order, opts);
-
+            Console.WriteLine("Queue Write => " + json);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var res = await _http.PostAsync(url, content);
         }
