@@ -69,19 +69,19 @@ else
                         <td>
                             @if (o.Status == "Placed")
                             {
-                                <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
+                                <span class="badge-soft status-placed rounded-pill px-2 py-1">@o.Status</span>
                             }
                             else if (o.Status == "Processed")
                             {
-                                <span class="badge-soft status-processing rounded-pill px-2 py-1">Process</span>
+                                <span class="badge-soft status-processing rounded-pill px-2 py-1">@o.Status</span>
                             }
                             else if (o.Status == "Completed")
                             {
-                                <span class="badge-soft status-completed rounded-pill px-2 py-1">Completed</span>
+                                <span class="badge-soft status-completed rounded-pill px-2 py-1">@o.Status</span>
                             }
                             else if (o.Status == "Cancelled")
                             {
-                                <span class="badge-soft status-cancelled rounded-pill px-2 py-1">Cancelled</span>
+                                <span class="badge-soft status-cancelled rounded-pill px-2 py-1">@o.Status</span>
                             }
                             else
                             {
@@ -106,10 +106,12 @@ else
                                     <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                                     <select class="form-select select-contrast" name="status">
-                                        <option value="">Status: All</option>
-                                        @foreach (var s in (IEnumerable<string>)ViewData["Statuses"])
+                                        @foreach (var s in statuses)
                                         {
-                                            <option value="@s" selected="@(status == s)">@s</option>
+                                            <option value="@s"
+                                                    selected="@(string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase))">
+                                                @s
+                                            </option>
                                         }
                                     </select>
 

@@ -221,6 +221,9 @@ namespace ST10382638_CLDV_POE.Controllers
 
             if (customer == null) return NotFound();
 
+            if (!ModelState.IsValid)
+                Console.WriteLine("Model not valid");
+
             // Update scalar Customer fields (no [Bind], use your model directly)
             customer.FirstName = form.FirstName;
             customer.LastName = form.LastName;

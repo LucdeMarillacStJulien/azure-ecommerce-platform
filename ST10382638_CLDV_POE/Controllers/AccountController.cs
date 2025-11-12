@@ -35,6 +35,19 @@ namespace ST10382638_CLDV_POE.Controllers
                 return View();
             }
 
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var uid = user.UserId.ToString();
+            var anon = Request.Cookies["CartId"];
+            if (!string.IsNullOrEmpty(anon))
+            {
+                var anonItems = await _context.CartItem.Where(c => c.UserId == anon).ToListAsync();
+                foreach (var it in anonItems) it.UserId = uid;
+                await _context.SaveChangesAsync();
+                Response.Cookies.Delete("CartId");
+            }
+
+            // Existing login logic
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
@@ -47,12 +60,13 @@ namespace ST10382638_CLDV_POE.Controllers
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            // Role-based redirect
+            // Redirect by role
             if (claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
-                return RedirectToAction("Index", "Home");                // Admin → Home/Index
+                return RedirectToAction("Index", "Home");
 
-            return RedirectToAction("Main", "Customer");                  // Customer → simple success view
+            return RedirectToAction("Main", "Customer");
         }
+
 
         [Authorize]
         public async Task<IActionResult> Logout()
