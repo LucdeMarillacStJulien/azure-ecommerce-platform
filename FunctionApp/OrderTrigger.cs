@@ -33,9 +33,7 @@ namespace FunctionApp
         /// </summary>
         public OrderTrigger(ILogger<OrderTrigger> logger)
         {
-            _logger = logger;
-            _storageConnection = "DefaultEndpointsProtocol=https;AccountName=st10382638storage;AccountKey=<REDACTED>;EndpointSuffix=core.windows.net"; // Azure Storage connection string
-            var serviceClient = new TableServiceClient(_storageConnection);
+            _logger = logger;var serviceClient = new TableServiceClient(_storageConnection);
             _tableClient = serviceClient.GetTableClient("Orders");
         }
 

@@ -221,6 +221,10 @@ namespace ST10382638_CLDV_POE.Controllers
 
             if (customer == null) return NotFound();
 
+            ModelState.Remove(nameof(form.User));
+            ModelState.Remove("User.Email");
+            ModelState.Remove("User.Password");
+
             if (!ModelState.IsValid)
                 Console.WriteLine("Model not valid");
 
@@ -272,7 +276,10 @@ namespace ST10382638_CLDV_POE.Controllers
             if (customer == null) return NotFound("Customer not found.");
 
             // Remove only the Customer. If you later want cascade to User, configure FK or delete explicitly.
+            
             _context.Customer.Remove(customer);
+            _context.User.Remove(customer.User!);
+            
             await _context.SaveChangesAsync();
 
             return Ok(); // delete.js expects success without redirect
