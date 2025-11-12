@@ -48,10 +48,11 @@ namespace ST10382638_CLDV_POE.Controllers
 
             if (idInts.Count == 0) return new Dictionary<int, string>();
 
+            // FIX: match on Customer.UserId and key the dictionary by UserId
             return await _context.Customer
-                .Where(c => idInts.Contains(c.CustomerId))
-                .Select(c => new { c.CustomerId, FullName = c.FirstName + " " + c.LastName })
-                .ToDictionaryAsync(x => x.CustomerId, x => x.FullName);
+                .Where(c => idInts.Contains(c.UserId))
+                .Select(c => new { c.UserId, FullName = c.FirstName + " " + c.LastName })
+                .ToDictionaryAsync(x => x.UserId, x => x.FullName);
         }
 
 
@@ -121,32 +122,73 @@ namespace ST10382638_CLDV_POE.Controllers
 
         [Authorize(Roles = ("Admin"))]
         [HttpGet]
-        public async Task<IActionResult> Index(string q = null, string status = null)
+        public async Task<IActionResult> Index(string q = null, string status = null, string customerId = null, DateTime? dateFrom = null, DateTime? dateTo = null, double? minTotal = null,
+                                                double? maxTotal = null, int? minItems = null, int? maxItems = null, string sort = "date_desc")
         {
             var all = await _order.GetAllOrdersAsync() ?? new List<Order>();
 
-            // Filter: OrderId / CustomerId / Status
+            // Text search: Order ID (RowKey) only (matches view's placeholder)
             if (!string.IsNullOrWhiteSpace(q))
             {
                 var term = q.Trim();
                 all = all.Where(o =>
-                    (!string.IsNullOrEmpty(o.RowKey) && o.RowKey.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrEmpty(o.CustomerId) && o.CustomerId.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    !string.IsNullOrEmpty(o.RowKey) &&
+                    o.RowKey.Contains(term, StringComparison.OrdinalIgnoreCase)
                 ).ToList();
             }
 
+            // Status filter (dropdown)
             if (!string.IsNullOrWhiteSpace(status))
             {
                 var s = status.Trim();
                 all = all.Where(o => string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Pull customer names from SQL using the CustomerId stored on orders
+            // Date range (inclusive end)
+            if (dateFrom.HasValue)
+                all = all.Where(o => o.OrderDate >= dateFrom.Value).ToList();
+
+            if (dateTo.HasValue)
+            {
+                var end = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                all = all.Where(o => o.OrderDate <= end).ToList();
+            }
+
+            // Totals range
+            if (minTotal.HasValue)
+                all = all.Where(o => o.TotalPrice >= minTotal.Value).ToList();
+
+            if (maxTotal.HasValue)
+                all = all.Where(o => o.TotalPrice <= maxTotal.Value).ToList();
+
+            // ItemCount range
+            if (minItems.HasValue)
+                all = all.Where(o => o.ItemCount >= minItems.Value).ToList();
+
+            if (maxItems.HasValue)
+                all = all.Where(o => o.ItemCount <= maxItems.Value).ToList();
+
+            // Default ordering: newest first (matches table rendering)
+            all = all.OrderByDescending(o => o.OrderDate).ToList();
+
+            // Names + statuses for the view
             var names = await BuildCustomerNamesAsync(all.Select(o => o.CustomerId));
             ViewData["CustomerNames"] = names;
-            ViewData["Statuses"] = GetAllStatuses(); // add here
-            return View(all.OrderByDescending(o => o.OrderDate).ToList());
+            ViewData["Statuses"] = GetAllStatuses();
+
+            // Preserve chosen filters
+            ViewData["q"] = q;
+            ViewData["status"] = status;
+            ViewData["dateFrom"] = dateFrom?.ToString("yyyy-MM-dd");
+            ViewData["dateTo"] = dateTo?.ToString("yyyy-MM-dd");
+            ViewData["minTotal"] = minTotal;
+            ViewData["maxTotal"] = maxTotal;
+            ViewData["minItems"] = minItems;
+            ViewData["maxItems"] = maxItems;
+
+            return View(all);
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpGet]

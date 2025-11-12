@@ -6,14 +6,15 @@
 // ChatGPT, https://chat.openai.com/
 // W3Schools, https://www.w3schools.com/cs/index.php
 
-using System;
-using System.Text.Json;
 using Azure.Data.Tables;
 using Azure.Storage.Queues.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ST10382638_CLDV_POE.Models;
+using System;
+using System.Text.Json;
 
 namespace FunctionApp
 {
@@ -26,14 +27,17 @@ namespace FunctionApp
         private readonly ILogger<OrderTrigger> _logger;
         private readonly string _storageConnection;
         private TableClient _tableClient;
+        private readonly IConfiguration _config;
 
         /// <summary>
         /// Constructor initializes the TableClient for 'Orders' table.
         /// Uses a storage connection string defined in code.
         /// </summary>
-        public OrderTrigger(ILogger<OrderTrigger> logger)
+        public OrderTrigger(ILogger<OrderTrigger> logger, IConfiguration config)
         {
-            _logger = logger;var serviceClient = new TableServiceClient(_storageConnection);
+            _config = config;
+            _logger = logger;
+            var serviceClient = new TableServiceClient(_config["AzureWebJobsStorage"]);
             _tableClient = serviceClient.GetTableClient("Orders");
         }
 

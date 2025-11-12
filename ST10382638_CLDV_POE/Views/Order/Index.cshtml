@@ -16,20 +16,65 @@
 
 <!-- Search & Filters BELOW header -->
 <div class="search-card mb-3">
-    <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
-        <input class="form-control" type="text" name="q" value="@q" placeholder="Search Order or Customer Name" />
+    <form method="get">
+        <!-- Section title (optional, matches your UI tone) -->
+        <div class="row">
+            <div class="col-12">
+                <h5 class="mb-2">Filter orders</h5>
+            </div>
+        </div>
 
-        <select class="form-select select-contrast" name="status">
-            <option value="">Status: All</option>
-            @foreach (var s in statuses)
-            {
-                <option value="@s" selected="@(string.Equals(status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
-            }
-        </select>
+        <div class="row g-2 align-items-end">
+            <!-- Row 1: Search + Date range + Status -->
+            <div class="col-12 col-md-3">
+                <label class="form-label mb-1">Order ID</label>
+                <input class="form-control" type="text" name="q" value="@q" placeholder="Search Order ID" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">From</label>
+                <input class="form-control" type="date" name="dateFrom" value="@(ViewData["dateFrom"])" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">To</label>
+                <input class="form-control" type="date" name="dateTo" value="@(ViewData["dateTo"])" />
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label mb-1">Status</label>
+                <select class="form-select select-contrast" name="status">
+                    <option value="">Status: All</option>
+                    @foreach (var s in statuses)
+                    {
+                        <option value="@s" selected="@(string.Equals(status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
+                    }
+                </select>
+            </div>
 
-        <button class="btn btn-primary" type="submit" title="Filter">
-            <i class="bi bi-search"></i>
-        </button>
+            <!-- Row 2: Totals + Item counts -->
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Min total</label>
+                <input class="form-control" type="number" step="0.01" name="minTotal" value="@(ViewData["minTotal"])" placeholder="e.g. 100.00" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Max total</label>
+                <input class="form-control" type="number" step="0.01" name="maxTotal" value="@(ViewData["maxTotal"])" placeholder="e.g. 500.00" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Min items</label>
+                <input class="form-control" type="number" name="minItems" value="@(ViewData["minItems"])" placeholder="e.g. 1" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Max items</label>
+                <input class="form-control" type="number" name="maxItems" value="@(ViewData["maxItems"])" placeholder="e.g. 10" />
+            </div>
+
+            <!-- Row 3: Actions -->
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <a class="btn btn-outline-light" href="@Url.Action("Index", "Order")" title="Reset">Reset</a>
+                <button class="btn btn-primary" type="submit" title="Filter">
+                    <i class="bi bi-search"></i> Apply
+                </button>
+            </div>
+        </div>
     </form>
 </div>
 
