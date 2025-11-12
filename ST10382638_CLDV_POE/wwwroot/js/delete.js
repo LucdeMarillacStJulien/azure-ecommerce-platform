@@ -1,139 +1,110 @@
-﻿// delete.js (full, fixed)
-// Requires jQuery + Bootstrap 5. Place after your table HTML & modal markup.
+﻿// customer-delete.js — Delete for Customers (SQL-backed)
+// Requires jQuery + Bootstrap 5. Works with _ConfirmDeleteModal and the hidden AF form (#__af).
 
 (function ($) {
     "use strict";
 
-    let pending = null;
+    if (window.__customerDeleteBound) return; // avoid double-binding
+    window.__customerDeleteBound = true;
 
-    // Finds an anti-forgery token anywhere on the page.
+    let pending = null; // { url, id, $btn }
+
+    // Anti-forgery token helper (works with your hidden form in _ConfirmDeleteModal)
     function getToken() {
         return $('#__af input[name="__RequestVerificationToken"]').first().val()
             || $('input[name="__RequestVerificationToken"]').first().val()
             || '';
     }
 
-    // Generic delete via POST to /{Controller}/Delete with id in the body.
-    function ajaxDelete(urlBase, id, btn) {
-        const token = getToken();
-        $.ajax({
-            url: `${urlBase}`,         // no "/{id}" — controller expects body param
-            type: 'POST',
-            data: {
-                id: id,                  // common pattern
-                RowKey: id,              // covers controllers that bind RowKey
-                __RequestVerificationToken: token
-            }
-        })
-            .done(function () {
-                // Remove the row with a tiny animation
-                const $row = $(btn).closest('[data-row], tr');
-                if ($row.length) {
-                    $row.css('will-change', 'opacity, transform')
-                        .animate({ opacity: 0 }, 120, function () {
-                            $row.slideUp(100, function () { $row.remove(); });
-                        });
-                }
-                $('#toastDeleteMsg').text('Deleted successfully.');
-                const te = document.getElementById('toastDelete');
-                if (te) bootstrap.Toast.getOrCreateInstance(te).show();
-            })
-            .fail(function (xhr) {
-                $('#toastDeleteMsg').text(xhr?.responseText || 'Delete failed. Please try again.');
-                const te = document.getElementById('toastDelete');
-                if (te) bootstrap.Toast.getOrCreateInstance(te).show();
-            });
+    // UI helpers
+    function openModal(itemLabel) {
+        $('#cd-item-name').text(itemLabel || 'this customer');
+        const modalEl = document.getElementById('confirmDeleteModal');
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+    function closeModal() {
+        const modalEl = document.getElementById('confirmDeleteModal');
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    }
+    function showToast(msg) {
+        const $msg = $('#toastDeleteMsg');
+        if ($msg.length) $msg.text(msg || 'Deleted.');
+        const toastEl = document.getElementById('toastDelete');
+        if (toastEl) bootstrap.Toast.getOrCreateInstance(toastEl).show();
     }
 
-    // Opens the confirmation modal and stores the target.
-    function openConfirm(urlBase, id, btn, nameFallback) {
-        if (!id) return;
-        pending = { urlBase, id, $btn: btn };
-        $('#cd-item-name').text($(btn).data('name') || nameFallback);
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal')).show();
-    }
-
-    // === QUEUE-SPECIFIC ADDITIONS ===
-
-    // POST /Inventory/DeleteQueueMessage with messageId + popReceipt
-    function ajaxDeleteQueue(urlBase, messageId, popReceipt, btn) {
-        const token = getToken();
-        $.ajax({
-            url: `${urlBase}`,
-            type: 'POST',
-            data: {
-                messageId: messageId,
-                popReceipt: popReceipt,
-                __RequestVerificationToken: token
-            }
-        })
-            .done(function () {
-                const $row = $(btn).closest('[data-row], tr');
-                if ($row.length) {
-                    $row.css('will-change', 'opacity, transform')
-                        .animate({ opacity: 0 }, 120, function () {
-                            $row.slideUp(100, function () { $row.remove(); });
-                        });
-                }
-                $('#toastDeleteMsg').text('Queue message deleted.');
-                const te = document.getElementById('toastDelete');
-                if (te) bootstrap.Toast.getOrCreateInstance(te).show();
-            })
-            .fail(function (xhr) {
-                $('#toastDeleteMsg').text(xhr?.responseText || 'Queue delete failed. Please try again.');
-                const te = document.getElementById('toastDelete');
-                if (te) bootstrap.Toast.getOrCreateInstance(te).show();
-            });
-    }
-
-    // Open confirm for queue with both id + popReceipt
-    function openConfirmQueue(urlBase, messageId, popReceipt, btn, nameFallback) {
-        if (!messageId || !popReceipt) return;
-        pending = { urlBase, id: messageId, pop: popReceipt, $btn: btn };
-        $('#cd-item-name').text($(btn).data('name') || nameFallback || 'this message');
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal')).show();
-    }
-
-    // === /QUEUE-SPECIFIC ADDITIONS ===
-
-    // Confirm button in the modal
-    $(document).on('click', '#cd-confirm-btn', function () {
-        if (!pending) return;
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal')).hide();
-
-        // If a popReceipt is present, it's a queue delete; otherwise use the generic delete.
-        if (pending.pop) {
-            ajaxDeleteQueue(pending.urlBase, pending.id, pending.pop, pending.$btn);
+    // Attempt to remove a visible UI element for this customer; fallback to reload
+    function removeRow($trigger) {
+        // Prefer explicit row containers if present:
+        const $row = $trigger.closest('[data-row], tr, .card, li');
+        if ($row.length) {
+            $row.fadeOut(150, function () { $(this).remove(); });
         } else {
-            ajaxDelete(pending.urlBase, pending.id, pending.$btn);
+            // If we can't confidently remove a row, ensure the UI is consistent:
+            setTimeout(function () { window.location.reload(); }, 300);
         }
-        pending = null;
-    });
+    }
 
-    // Triggers for each entity type
-    $(document).on('click', '.js-delete-product', function (e) {
-        e.preventDefault();
-        openConfirm('/Product/Delete', $(this).data('id'), this, 'this product');
-    });
+    // Core AJAX POST to /Customer/Delete
+    async function ajaxDelete(url, id, $btn) {
+        const token = getToken();
+        // Graceful state on the trigger
+        const prevHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Deleting');
 
-    $(document).on('click', '.js-delete-customer', function (e) {
-        e.preventDefault();
-        openConfirm('/Customer/Delete', $(this).data('id'), this, 'this customer');
-    });
+        try {
+            const res = await $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    id: id,
+                    __RequestVerificationToken: token
+                },
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
 
-    $(document).on('click', '.js-delete-order', function (e) {
-        e.preventDefault();
-        openConfirm('/Order/Delete', $(this).data('id'), this, 'this order');
-    });
+            // Success (HTTP 200): update UI
+            showToast('Customer deleted.');
+            removeRow($btn);
+        } catch (xhr) {
+            // If the action returns 404/400/etc, surface a clear message
+            const msg = (xhr && xhr.responseText) ? xhr.responseText : 'Delete failed.';
+            showToast(msg);
+        } finally {
+            $btn.prop('disabled', false).html(prevHtml);
+        }
+    }
 
-    // NEW: queue trigger (button must have data-id and data-pop)
-    $(document).on('click', '.js-delete-queue', function (e) {
-        e.preventDefault();
-        openConfirmQueue('/Inventory/Delete',
-            $(this).data('id'),
-            $(this).data('pop'),
-            this,
-            'this queue message');
-    });
+    // Wire confirm button in the modal
+    $(document).off('click.customerDelete', '#cd-confirm-btn')
+        .on('click.customerDelete', '#cd-confirm-btn', function () {
+            if (!pending) return;
+            closeModal();
+            ajaxDelete(pending.url, pending.id, pending.$btn);
+            pending = null;
+        });
+
+    // Trigger: any element with .js-delete-customer
+    // Expected data attributes on the trigger:
+    //   data-id   : numeric or string CustomerId
+    //   data-name : optional display name for the modal text
+    //   data-url  : optional custom endpoint; defaults to '/Customer/Delete'
+    $(document).off('click.customerDelete', '.js-delete-customer')
+        .on('click.customerDelete', '.js-delete-customer', function (e) {
+            e.preventDefault();
+
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const name = $btn.data('name') || 'this customer';
+            const url = $btn.data('url') || '/Customer/Delete';
+
+            if (id === undefined || id === null || id === '') {
+                showToast('Missing customer id.');
+                return;
+            }
+
+            pending = { url, id, $btn };
+            openModal(name);
+        });
 
 })(jQuery);

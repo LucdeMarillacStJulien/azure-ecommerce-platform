@@ -182,5 +182,97 @@ namespace ST10382638_CLDV_POE.Controllers
             if (!Regex.IsMatch(pwd, "[^a-zA-Z0-9]")) errors.Add("At least one special character.");
             return errors;
         }
+
+        // GET: /Customer/Details/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var customer = await _context.Customer
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        // GET: /Customer/Edit/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var customer = await _context.Customer
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        // POST: /Customer/Edit/5
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Customer form)
+        {
+            if (id != form.CustomerId) return BadRequest();
+
+            var customer = await _context.Customer
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null) return NotFound();
+
+            // Update scalar Customer fields (no [Bind], use your model directly)
+            customer.FirstName = form.FirstName;
+            customer.LastName = form.LastName;
+            customer.DOB = form.DOB;
+            customer.PhoneNumber = form.PhoneNumber;
+            customer.Company = form.Company;
+            customer.AddressLine1 = form.AddressLine1;
+            customer.AddressLine2 = form.AddressLine2;
+            customer.City = form.City;
+            customer.State = form.State;
+            customer.ZipCode = form.ZipCode;
+            customer.Country = form.Country;
+
+            // Email updates go through your Customer.Email proxy → User.Email
+            // This uses your existing Customer.Email getter/setter.
+            customer.Email = form.Email;
+
+            // Optional: allow Admin to change password here ONLY if a non-empty value is posted via form.User.Password.
+            // Keep your dedicated Password view as the primary flow.
+            if (form.User != null && !string.IsNullOrWhiteSpace(form.User.Password))
+            {
+                if (customer.User == null) customer.User = new User();
+                customer.User.Password = form.User.Password;
+            }
+
+            if (!TryValidateModel(customer))
+            {
+                return View(customer);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /Customer/Delete
+        // Called by delete.js via AJAX, uses anti-forgery, returns 200 OK on success.
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var customer = await _context.Customer
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null) return NotFound("Customer not found.");
+
+            // Remove only the Customer. If you later want cascade to User, configure FK or delete explicitly.
+            _context.Customer.Remove(customer);
+            await _context.SaveChangesAsync();
+
+            return Ok(); // delete.js expects success without redirect
+        }
     }
 }

@@ -4,6 +4,7 @@
     ViewData["Title"] = "Order " + Model.RowKey;
     var returnUrl = (ViewData["returnUrl"] as string) ?? Context.Request.Query["returnUrl"].ToString();
     var customerName = ViewData["CustomerName"] as string;
+    var statuses = OrderStatus.All;
 }
 <link rel="stylesheet" href="~/css/ui.css" />
 
@@ -15,10 +16,10 @@
         @Html.AntiForgeryToken()
         <input type="hidden" name="id" value="@Model.RowKey" />
         <input type="hidden" name="returnUrl" value="@returnUrl" />
-        <select class="form-select select-contrast" name="status">
-            @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+        <select class="form-select select-contrast" name="status" id="status">
+            @foreach (var s in statuses)
             {
-                <option value="@s" selected="@(Model.Status == s ? "selected" : null)">@s</option>
+                <option value="@s" selected="@(string.Equals(Model.Status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
             }
         </select>
         <!-- match project: primary gradient button -->

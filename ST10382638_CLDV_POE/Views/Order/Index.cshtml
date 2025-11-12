@@ -7,6 +7,7 @@
     var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
     var names = ViewData["CustomerNames"] as System.Collections.Generic.IDictionary<int, string>
                 ?? new Dictionary<int, string>();
+    var statuses = OrderStatus.All;
 }
 
 <div class="page-head">
@@ -20,9 +21,9 @@
 
         <select class="form-select select-contrast" name="status">
             <option value="">Status: All</option>
-            @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+            @foreach (var s in statuses)
             {
-                <option value="@s" selected="@(status == s ? "selected" : null)">@s</option>
+                <option value="@s" selected="@(string.Equals(status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
             }
         </select>
 
@@ -70,9 +71,9 @@ else
                             {
                                 <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
                             }
-                            else if (o.Status == "Processing")
+                            else if (o.Status == "Processed")
                             {
-                                <span class="badge-soft status-processing rounded-pill px-2 py-1">Processing</span>
+                                <span class="badge-soft status-processing rounded-pill px-2 py-1">Process</span>
                             }
                             else if (o.Status == "Completed")
                             {
@@ -105,9 +106,10 @@ else
                                     <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                                     <select class="form-select select-contrast" name="status">
-                                        @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+                                        <option value="">Status: All</option>
+                                        @foreach (var s in (IEnumerable<string>)ViewData["Statuses"])
                                         {
-                                            <option value="@s" selected="@(o.Status == s ? "selected" : null)">@s</option>
+                                            <option value="@s" selected="@(status == s)">@s</option>
                                         }
                                     </select>
 

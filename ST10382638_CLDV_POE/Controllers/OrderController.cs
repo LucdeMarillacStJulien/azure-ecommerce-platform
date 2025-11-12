@@ -31,6 +31,11 @@ namespace ST10382638_CLDV_POE.Controllers
             return id;
         }
 
+        private static IEnumerable<string> GetAllStatuses()
+        {
+            return OrderStatus.All;
+        }
+
         // Builds a CustomerId → "First Last" map from SQL for the given string ids
         private async Task<Dictionary<int, string>> BuildCustomerNamesAsync(IEnumerable<string> ids)
         {
@@ -139,10 +144,7 @@ namespace ST10382638_CLDV_POE.Controllers
             // Pull customer names from SQL using the CustomerId stored on orders
             var names = await BuildCustomerNamesAsync(all.Select(o => o.CustomerId));
             ViewData["CustomerNames"] = names;
-
-            // Make names available to the view without creating a new model
-            ViewData["CustomerNames"] = names;
-
+            ViewData["Statuses"] = GetAllStatuses(); // add here
             return View(all.OrderByDescending(o => o.OrderDate).ToList());
         }
 
@@ -156,6 +158,7 @@ namespace ST10382638_CLDV_POE.Controllers
 
             // unified: provide dictionary even for one id
             ViewData["CustomerNames"] = await BuildCustomerNamesAsync(new[] { entity.CustomerId });
+            ViewData["Statuses"] = GetAllStatuses();
 
             var fallback = Url.Action(nameof(AdminDetails), new { id });
             ViewData["returnUrl"] =
@@ -219,6 +222,7 @@ namespace ST10382638_CLDV_POE.Controllers
 
             // unified: provide dictionary for the current user's id
             ViewData["CustomerNames"] = await BuildCustomerNamesAsync(mine.Select(o => o.CustomerId));
+            ViewData["Statuses"] = GetAllStatuses();
 
             ViewData["Title"] = "My Orders";
             return View("MyOrders", mine);
