@@ -631,3 +631,28 @@ input.form-control:-webkit-autofill:active {
         background: rgba(48,209,88,0.12);
         box-shadow: 0 0 14px rgba(48,209,88,0.35);
     }
+
+/* === Customer portal badge colors only === */
+.customer-portal .status-placed {
+    background: #3a7bd5;
+    color: #fff;
+    box-shadow: 0 0 6px #3a7bd5cc;
+}
+
+.customer-portal .status-processing {
+    background: #ffc107;
+    color: #000;
+    box-shadow: 0 0 6px #ffc107cc;
+}
+
+.customer-portal .status-completed {
+    background: #28a745;
+    color: #fff;
+    box-shadow: 0 0 6px #28a745cc;
+}
+
+.customer-portal .status-cancelled {
+    background: #dc3545;
+    color: #fff;
+    box-shadow: 0 0 6px #dc3545cc;
+}

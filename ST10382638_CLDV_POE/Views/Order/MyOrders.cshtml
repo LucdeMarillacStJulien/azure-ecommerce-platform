@@ -1,0 +1,116 @@
+﻿@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+    ViewData["Subtitle"] = "View and manage your orders";
+    var q = Context.Request.Query["q"].ToString();
+    var status = Context.Request.Query["status"].ToString();
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var names = ViewData["CustomerNames"] as System.Collections.Generic.IDictionary<int, string>
+                ?? new System.Collections.Generic.Dictionary<int, string>();
+    var customerName = names.Values.FirstOrDefault() ?? "Customer";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">@ViewData["Subtitle"] · @customerName</p>
+    </div>
+</div>
+
+<form method="get" asp-controller="Order" asp-action="MyOrders" class="mb-3 search-card">
+    <div class="input-group">
+        <input name="q" type="text" class="form-control"
+               placeholder="Search by Order ID or Status"
+               value="@q">
+        <select class="form-select select-contrast" name="status" style="max-width:220px;">
+            <option value="">Status: All</option>
+            @foreach (var s in new[] { "Placed", "Processing", "Completed", "Cancelled" })
+            {
+                <option value="@s" selected="@(status == s ? "selected" : null)">@s</option>
+            }
+        </select>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+    <small class="input-hint">Leave search empty to view all orders.</small>
+</form>
+
+<div class="glass-card p-3">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty">
+            <i class="bi bi-box-seam icon"></i>
+            <div>No orders yet.</div>
+            <div class="mt-2">
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-primary btn-sm">
+                    <i class="bi bi-cart-plus me-1"></i>Start shopping
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-neon table-compact align-middle">
+                <thead class="table-head-sticky">
+                    <tr>
+                        <th class="text-start" style="width:10%;">Order ID</th>
+                        <th class="text-start" style="width:25%;">Date</th>
+                        <th class="text-center" style="width:10%;">Items</th>
+                        <th class="text-end" style="width:15%;">Total</th>
+                        <th class="text-center" style="width:15%;">Status</th>
+                        <th class="text-end" style="width:15%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr data-row="order">
+                            <td class="text-start">@p.RowKey</td>
+                            <td class="text-start">@p.OrderDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-center">@p.ItemCount</td>
+                            <td class="text-end price text-nowrap">R @p.TotalPrice.ToString("0.00")</td>
+                            <td class="text-center">
+                                @if (p.Status == "Placed")
+                                {
+                                    <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
+                                }
+                                else if (p.Status == "Processing")
+                                {
+                                    <span class="badge-soft status-processing rounded-pill px-2 py-1">Processing</span>
+                                }
+                                else if (p.Status == "Completed")
+                                {
+                                    <span class="badge-soft status-completed rounded-pill px-2 py-1">Completed</span>
+                                }
+                                else if (p.Status == "Cancelled")
+                                {
+                                    <span class="badge-soft status-cancelled rounded-pill px-2 py-1">Cancelled</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-soft rounded-pill px-2 py-1">p.Status</span>
+                                }
+                            </td>
+                            <td class="actions text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details"
+                                       asp-route-id="@p.RowKey"
+                                       asp-route-returnUrl="@Url.Action("MyOrders", "Order")"
+                                       class="btn btn-outline-light" title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-2 text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Times shown in your local timezone. Click <strong>Details</strong> for full breakdown.
+        </div>
+    }
+</div>

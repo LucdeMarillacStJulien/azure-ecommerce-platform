@@ -31,6 +31,25 @@ namespace ST10382638_CLDV_POE.Controllers
             return id;
         }
 
+        // Builds a CustomerId → "First Last" map from SQL for the given string ids
+        private async Task<Dictionary<int, string>> BuildCustomerNamesAsync(IEnumerable<string> ids)
+        {
+            var idInts = ids
+                .Select(s => int.TryParse(s, out var n) ? n : (int?)null)
+                .Where(n => n.HasValue)
+                .Select(n => n!.Value)
+                .Distinct()
+                .ToList();
+
+            if (idInts.Count == 0) return new Dictionary<int, string>();
+
+            return await _context.Customer
+                .Where(c => idInts.Contains(c.CustomerId))
+                .Select(c => new { c.CustomerId, FullName = c.FirstName + " " + c.LastName })
+                .ToDictionaryAsync(x => x.CustomerId, x => x.FullName);
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout()
@@ -66,7 +85,7 @@ namespace ST10382638_CLDV_POE.Controllers
 
 
                 TotalPrice = (double)total,
-                OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.UtcNow.AddHours(2),
                 Status = "Placed",
 
                 // New fields
@@ -118,16 +137,8 @@ namespace ST10382638_CLDV_POE.Controllers
             }
 
             // Pull customer names from SQL using the CustomerId stored on orders
-            var idInts = all.Select(o => int.TryParse(o.CustomerId, out var n) ? n : (int?)null)
-                            .Where(n => n.HasValue)
-                            .Select(n => n!.Value)
-                            .Distinct()
-                            .ToList();
-
-            var names = await _context.Customer
-                .Where(c => idInts.Contains(c.CustomerId))
-                .Select(c => new { c.CustomerId, FullName = (c.FirstName + " " + c.LastName) })
-                .ToDictionaryAsync(x => x.CustomerId, x => x.FullName);
+            var names = await BuildCustomerNamesAsync(all.Select(o => o.CustomerId));
+            ViewData["CustomerNames"] = names;
 
             // Make names available to the view without creating a new model
             ViewData["CustomerNames"] = names;
@@ -142,6 +153,9 @@ namespace ST10382638_CLDV_POE.Controllers
             if (string.IsNullOrWhiteSpace(id)) return BadRequest();
             var entity = await _order.GetOrderByIdAsync(id);
             if (entity == null) return NotFound();
+
+            // unified: provide dictionary even for one id
+            ViewData["CustomerNames"] = await BuildCustomerNamesAsync(new[] { entity.CustomerId });
 
             var fallback = Url.Action(nameof(AdminDetails), new { id });
             ViewData["returnUrl"] =
@@ -173,6 +187,68 @@ namespace ST10382638_CLDV_POE.Controllers
 
             // ✅ Otherwise explicitly stay on AdminDetails
             return RedirectToAction("AdminDetails", new { id });
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public async Task<IActionResult> MyOrders(string q = null, string status = null)
+        {
+            var uid = CurrentUserId();
+            var all = await _order.GetAllOrdersAsync() ?? new List<Order>();
+
+            var mine = all.Where(o => o.CustomerId == uid)
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                mine = mine.Where(o =>
+                    (!string.IsNullOrEmpty(o.RowKey) && o.RowKey.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(o.Status) && o.Status.Contains(term, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                var s = status.Trim();
+                mine = mine.Where(o => string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            mine = mine.OrderByDescending(o => o.OrderDate).ToList();
+
+            // unified: provide dictionary for the current user's id
+            ViewData["CustomerNames"] = await BuildCustomerNamesAsync(mine.Select(o => o.CustomerId));
+
+            ViewData["Title"] = "My Orders";
+            return View("MyOrders", mine);
+        }
+
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public async Task<IActionResult> Details(string id, string returnUrl = null)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
+
+            var entity = await _order.GetOrderByIdAsync(id);
+            if (entity == null)
+                return NotFound();
+
+            var uid = CurrentUserId();
+            if (!string.Equals(entity.CustomerId, uid, StringComparison.Ordinal))
+                return Forbid();
+
+            // unified: provide dictionary for this order's id
+            ViewData["CustomerNames"] = await BuildCustomerNamesAsync(new[] { entity.CustomerId });
+
+            ViewData["Title"] = $"Order {entity.RowKey}";
+            ViewData["returnUrl"] = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : Url.Action("MyOrders");
+
+            return View("Details", entity);
         }
 
     }

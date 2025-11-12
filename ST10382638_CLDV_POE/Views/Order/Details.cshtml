@@ -1,0 +1,145 @@
+﻿@model Order
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Order " + Model.RowKey;
+    var returnUrl = (ViewData["returnUrl"] as string) ?? Url.Action("MyOrders", "Order");
+    var customerName = ViewData["CustomerName"] as string;
+}
+<link rel="stylesheet" href="~/css/ui.css" />
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="page-sub">
+            Placed @Model.OrderDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            @if (!string.IsNullOrWhiteSpace(customerName))
+            {
+                <text> · @customerName</text>
+            }
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@returnUrl" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-short me-1"></i> Back to My Orders
+        </a>
+    </div>
+</div>
+
+@{
+    using var doc = JsonDocument.Parse(Model.ItemsJson ?? "[]");
+    var items = doc.RootElement.ValueKind == JsonValueKind.Array
+        ? doc.RootElement.EnumerateArray()
+        : Enumerable.Empty<JsonElement>();
+}
+
+<div class="glass-card p-3 mt-3">
+    <h2 class="card-title mb-3">Order Information</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem;">
+        <div class="prose">
+            <dl class="detail-dl">
+                <dt>Order Date</dt>
+                <dd>@Model.OrderDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</dd>
+                <dt>Status</dt>
+                <dd>
+                    @* Use project-defined status classes exactly *@
+                    @if (Model.Status == "Placed")
+                    {
+                        <span class="badge-soft status-placed rounded-pill px-2 py-1">Placed</span>
+                    }
+                    else if (Model.Status == "Processing")
+                    {
+                        <span class="badge-soft status-processing rounded-pill px-2 py-1">Processing</span>
+                    }
+                    else if (Model.Status == "Completed")
+                    {
+                        <span class="badge-soft status-completed rounded-pill px-2 py-1">Completed</span>
+                    }
+                    else if (Model.Status == "Cancelled")
+                    {
+                        <span class="badge-soft status-cancelled rounded-pill px-2 py-1">Cancelled</span>
+                    }
+                    else
+                    {
+                        <span class="badge-soft rounded-pill px-2 py-1">@Model.Status</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+
+        <div class="prose">
+            <dl class="detail-dl">
+                <dt>Total Items</dt>
+                <dd>@Model.ItemCount</dd>
+                <dt>Total Price</dt>
+                <dd class="price text-nowrap">R @Model.TotalPrice.ToString("0.00")</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-3 mt-3">
+    @if (!items.Any())
+    {
+        <div class="empty">
+            <i class="bi bi-box-seam icon"></i>
+            <div>No items in this order.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-neon table-compact align-middle">
+                <thead class="table-head-sticky">
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var el in items)
+                    {
+                        var id = el.TryGetProperty("ProductId", out var pid) && pid.ValueKind == JsonValueKind.String ? pid.GetString() : "-";
+                        var name = el.TryGetProperty("ProductName", out var n) && n.ValueKind == JsonValueKind.String ? n.GetString() : "";
+                        var qty = el.TryGetProperty("Quantity", out var qEl) && qEl.ValueKind == JsonValueKind.Number ? qEl.GetInt32() : 0;
+                        var unit = el.TryGetProperty("UnitPrice", out var up) && up.ValueKind == JsonValueKind.Number ? up.GetDecimal() : 0m;
+                        var subtotal = unit * qty;
+                        var image = el.TryGetProperty("ImageUrl", out var im) && im.ValueKind == JsonValueKind.String ? im.GetString() : "";
+
+                        <tr data-row="order-item">
+                            <td>@id</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrWhiteSpace(image))
+                                    {
+                                        <img src="@image" alt="@name" class="thumb-64" />
+                                    }
+                                    else
+                                    {
+                                        <div class="thumb-64 bg-dark d-flex justify-content-center align-items-center text-muted small">
+                                            No Image
+                                        </div>
+                                    }
+                                    <div class="min-w-0">
+                                        <div class="fw-semibold truncate-32">@name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">@qty</td>
+                            <td class="text-end price text-nowrap">R @unit.ToString("0.00")</td>
+                            <td class="text-end price text-nowrap">R @subtotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-2 text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Prices reflect the order at time of placement.
+        </div>
+    }
+</div>
