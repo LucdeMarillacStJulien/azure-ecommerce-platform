@@ -23,36 +23,52 @@ namespace ST10382638_CLDV_POE.Services
     /// </summary>
     public class CustomerTableService
     {
+        // Table name used by the Functions endpoint for Customer entities.
         private readonly string _tableName = "Customer";
-        
+
+        // Configuration provider used to read Function base URLs and settings.
         private readonly IConfiguration _config;
 
+        /// <summary>
+        /// DI constructor to capture configuration settings.
+        /// </summary>
         public CustomerTableService(IConfiguration config)
         {
             _config = config;
         }
 
-
         //------------------------------------------------------------------------------------------------------------------------//
         /// <summary>
-        /// Inserts a new customer entity.
+        /// Inserts a new customer entity by calling the Function endpoint.
         /// </summary>
         /// <param name="customer">Customer to add.</param>
         public async Task InsertCustomerAsync(Customer customer)
         {
+            // Create HTTP client for outbound request to the Function.
             var _http = new HttpClient();
+
+            // Read the base URL for the Table write Function from configuration.
             var baseUrl = _config["Functions:TableWrite"];
 
+            // Configure JSON serialization options (case-insensitive).
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
+            // Prepare serialized JSON payload for potential use.
             var json = JsonSerializer.Serialize(customer, options);
+
+            // Prepare typed HTTP content with JSON media type (kept for reference).
             var content = new StringContent(json, Encoding.UTF8, "appllication/json");
 
+            // Build the request URL including the table name query parameter.
             var url = $"{baseUrl}&tableName={_tableName}";
+
+            // Post the customer entity as JSON to the Function endpoint.
             var response = await _http.PostAsJsonAsync(url, customer);
+
+            // Log the raw response to console for diagnostic purposes.
             Console.WriteLine(response);
         }
 
@@ -109,14 +125,14 @@ namespace ST10382638_CLDV_POE.Services
         /// Generates the next numeric RowKey by scanning existing keys in the "Customer" partition.
         /// </summary>
         /// <remarks>
-        /// Simple max+1 strategy; suitable for demos/small datasets.  
+        /// Simple max+1 strategy; suitable for demos/small datasets.
         /// For higher concurrency/scale, consider GUIDs or a dedicated counter.
         /// </remarks>
         /// <returns>Next RowKey as a string.</returns>
         //public string GetNextRowKey()
         //{
         //    Pageable<Customer> customers = _tableClient.Query<Customer>(c => c.PartitionKey == "Customer");
-
+        //
         //    int max = 0;
         //    foreach (var customer in customers)
         //    {
@@ -128,7 +144,7 @@ namespace ST10382638_CLDV_POE.Services
         //            }
         //        }
         //    }
-
+        //
         //    return (max + 1).ToString();
         //}
     }

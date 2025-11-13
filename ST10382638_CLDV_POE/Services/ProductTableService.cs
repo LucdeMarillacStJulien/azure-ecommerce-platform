@@ -182,6 +182,51 @@ namespace ST10382638_CLDV_POE.Services
 
             return (max + 1).ToString();
         }
+
+        //------------------------------------------------------...--------------------------------------------------------------//
+        /// <summary>
+        /// Attempts to reserve (decrease) stock for a collection of cart items.
+        /// Ensures all items have sufficient stock; if any reservation fails,
+        /// previously reserved stock is rolled back.
+        /// </summary>
+        /// <param name="items">Cart items to reserve stock for.</param>
+        /// <returns>
+        /// True if stock was successfully reserved for all items; otherwise false.
+        /// </returns>
+        public async Task<bool> TryReserveStockForItemsAsync(IEnumerable<CartItem> items)
+        {
+            if (items == null)
+                return false;
+
+            // Track successful reservations for rollback if needed
+            var reserved = new List<(string ProductId, int Quantity)>();
+
+            foreach (var item in items)
+            {
+                if (item == null) continue;
+                if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
+
+                var qty = item.Quantity;
+                if (qty <= 0) continue;
+
+                var ok = await TryReserveStockAsync(item.ProductId, qty);
+                if (!ok)
+                {
+                    // Roll back any stock we already reserved
+                    foreach (var r in reserved)
+                    {
+                        await ReleaseStockAsync(r.ProductId, r.Quantity);
+                    }
+
+                    return false;
+                }
+
+                reserved.Add((item.ProductId, qty));
+            }
+
+            return true;
+        }
+
     }
 }
 //------------------------------------------...ooo000 END OF FILE 000ooo...------------------------------------------------------//

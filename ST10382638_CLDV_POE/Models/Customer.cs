@@ -16,17 +16,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ST10382638_CLDV_POE.Models
 {
     /// <summary>
-    /// Customer entity stored in Azure Table Storage.
-    /// Implements ITableEntity and uses DataAnnotations for MVC validation/display.
+    /// Represents a Customer entity with relational mapping and MVC validation.
+    /// Data stored in Azure Table Storage with linkage to the User entity.
     /// </summary>
     public class Customer
     {
+        // Primary key generated automatically (EF Identity column).
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CustomerId { get; set; }
 
         /// <summary>
-        /// Customer's given name.
+        /// Customer's first/given name.
         /// </summary>
         [Required]
         [Display(Name = "First Name")]
@@ -34,7 +35,7 @@ namespace ST10382638_CLDV_POE.Models
         public string FirstName { get; set; }
 
         /// <summary>
-        /// Customer's family/surname.
+        /// Customer's last/surname.
         /// </summary>
         [Required]
         [Display(Name = "Surname")]
@@ -42,12 +43,16 @@ namespace ST10382638_CLDV_POE.Models
         public string LastName { get; set; }
 
         /// <summary>
-        /// Date of birth (store/normalize as UTC in controller/service).
+        /// Customer's date of birth.
         /// </summary>
         [Required]
         [Display(Name = "Date of Birth")]
         public DateTime DOB { get; set; }
 
+        /// <summary>
+        /// Email proxy property linked to the User.Email field.
+        /// Not stored directly in database; managed via User navigation property.
+        /// </summary>
         [NotMapped]
         [Required]
         [EmailAddress]
@@ -61,8 +66,9 @@ namespace ST10382638_CLDV_POE.Models
                 User.Email = value ?? string.Empty;
             }
         }
+
         /// <summary>
-        /// Contact phone number.
+        /// Contact phone number for the customer.
         /// </summary>
         [Required]
         [Phone]
@@ -70,7 +76,7 @@ namespace ST10382638_CLDV_POE.Models
         public string PhoneNumber { get; set; }
 
         /// <summary>
-        /// Company/Organization name.
+        /// Associated company or organization name.
         /// </summary>
         [Required]
         [StringLength(50)]
@@ -78,7 +84,7 @@ namespace ST10382638_CLDV_POE.Models
         public string Company { get; set; }
 
         /// <summary>
-        /// Primary street address line.
+        /// Primary address line for street or PO box.
         /// </summary>
         [Required]
         [Display(Name = "Address Line 1")]
@@ -91,32 +97,35 @@ namespace ST10382638_CLDV_POE.Models
         public string? AddressLine2 { get; set; }
 
         /// <summary>
-        /// City/Town.
+        /// City or town name.
         /// </summary>
         [Required]
         public string City { get; set; }
 
         /// <summary>
-        /// Province/State/Region.
+        /// Province, state, or regional subdivision.
         /// </summary>
         [Required]
         [Display(Name = "Province or State")]
         public string State { get; set; }
 
         /// <summary>
-        /// Postal/ZIP code.
+        /// Postal or ZIP code for the address.
         /// </summary>
         [Required]
         [Display(Name = "Zip Code")]
         public string ZipCode { get; set; }
 
         /// <summary>
-        /// Country name (ISO suggestions optional).
+        /// Country where the customer resides.
         /// </summary>
         [Required]
         public string Country { get; set; }
 
+        // Foreign key linking to User table.
         public int UserId { get; set; }
+
+        // Navigation property representing the linked User record.
         public User User { get; set; }
     }
 }

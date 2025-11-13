@@ -64,6 +64,7 @@ namespace ST10382638_CLDV_POE.Controllers
         // GET: ProductController/Create
         public ActionResult Create()
         {
+            ViewBag.Categories = ProductCategories.List;
             return View();
         }
 
@@ -76,6 +77,12 @@ namespace ST10382638_CLDV_POE.Controllers
             ModelState.Remove("imageFile");
             ModelState.Remove("RowKey");
             ModelState.Remove("ImageUrl");
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categories = ProductCategories.List;
+                return View(product);
+            }
 
             if (imageFile == null || imageFile.Length == 0)
             {
@@ -143,7 +150,7 @@ namespace ST10382638_CLDV_POE.Controllers
             {
                 return NotFound();
             }
-
+            ViewBag.Categories = ProductCategories.List;
             return View(product);
         }
 

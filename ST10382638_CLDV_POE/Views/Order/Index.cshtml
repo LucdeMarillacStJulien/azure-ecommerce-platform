@@ -77,99 +77,101 @@
         </div>
     </form>
 </div>
-
-@if (!Model.Any())
-{
-    <div class="empty">No orders found.</div>
-}
-else
-{
-    <div class="search-card">
-        <table class="table table-neon">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Date</th>
-                    <th class="text-end">Items</th>
-                    <th class="text-end">Total</th>
-                    <th>Status</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var o in Model.OrderByDescending(x => x.OrderDate))
-                {
-                    var nm = (int.TryParse(o.CustomerId, out var cid) && names.ContainsKey(cid))
-                    ? names[cid]
-                    : "Unknown Customer";
-
+<div>
+    @if (!Model.Any())
+    {
+        <div class="empty">No orders found.</div>
+    }
+    else
+    {
+        <div class="search-card">
+            <table class="table table-neon">
+                <thead>
                     <tr>
-                        <td class="truncate-28">@o.RowKey</td>
-                        <td class="truncate-28">@nm</td>
-                        <td>@($"{o.OrderDate:yyyy-MM-dd HH:mm}")</td>
-                        <td class="text-end">@o.ItemCount</td>
-                        <td class="text-end">R @o.TotalPrice.ToString("0.00")</td>
-
-                        <td>
-                            @if (o.Status == "Placed")
-                            {
-                                <span class="badge-soft status-placed rounded-pill px-2 py-1">@o.Status</span>
-                            }
-                            else if (o.Status == "Processed")
-                            {
-                                <span class="badge-soft status-processing rounded-pill px-2 py-1">@o.Status</span>
-                            }
-                            else if (o.Status == "Completed")
-                            {
-                                <span class="badge-soft status-completed rounded-pill px-2 py-1">@o.Status</span>
-                            }
-                            else if (o.Status == "Cancelled")
-                            {
-                                <span class="badge-soft status-cancelled rounded-pill px-2 py-1">@o.Status</span>
-                            }
-                            else
-                            {
-                                <span class="badge-soft rounded-pill px-2 py-1">@o.Status</span>
-                            }
-                        </td>
-
-                        <td class="text-end">
-                            <div class="d-flex justify-content-end gap-2 align-items-center">
-
-                                <a class="btn btn-sm btn-outline-light"
-                                   asp-action="AdminDetails"
-                                   asp-route-id="@o.RowKey"
-                                   asp-route-returnUrl="@returnUrl"
-                                   title="Details">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-
-                                <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 align-items-center">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@o.RowKey" />
-                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
-
-                                    <select class="form-select select-contrast" name="status">
-                                        @foreach (var s in statuses)
-                                        {
-                                            <option value="@s"
-                                                    selected="@(string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase))">
-                                                @s
-                                            </option>
-                                        }
-                                    </select>
-
-                                    <button type="submit" class="btn btn-sm btn-outline-light" title="Save">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                </form>
-
-                            </div>
-                        </td>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th class="text-end">Items</th>
+                        <th class="text-end">Total</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.OrderByDescending(x => x.OrderDate))
+                    {
+                        var nm = (int.TryParse(o.CustomerId, out var cid) && names.ContainsKey(cid))
+                        ? names[cid]
+                        : "Unknown Customer";
+
+                        <tr>
+                            <td class="truncate-28">@o.RowKey</td>
+                            <td class="truncate-28">@nm</td>
+                            <td>@($"{o.OrderDate:yyyy-MM-dd HH:mm}")</td>
+                            <td class="text-end">@o.ItemCount</td>
+                            <td class="text-end">R @o.TotalPrice.ToString("0.00")</td>
+
+                            <td>
+                                @if (o.Status == "Placed")
+                                {
+                                    <span class="badge-soft status-placed rounded-pill px-2 py-1">@o.Status</span>
+                                }
+                                else if (o.Status == "Processed")
+                                {
+                                    <span class="badge-soft status-processing rounded-pill px-2 py-1">@o.Status</span>
+                                }
+                                else if (o.Status == "Completed")
+                                {
+                                    <span class="badge-soft status-completed rounded-pill px-2 py-1">@o.Status</span>
+                                }
+                                else if (o.Status == "Cancelled")
+                                {
+                                    <span class="badge-soft status-cancelled rounded-pill px-2 py-1">@o.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-soft rounded-pill px-2 py-1">@o.Status</span>
+                                }
+                            </td>
+
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 align-items-center">
+
+                                    <a class="btn btn-sm btn-outline-light"
+                                       asp-action="AdminDetails"
+                                       asp-route-id="@o.RowKey"
+                                       asp-route-returnUrl="@returnUrl"
+                                       title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 align-items-center">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@o.RowKey" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                                        <select class="form-select select-contrast" name="status">
+                                            @foreach (var s in statuses)
+                                            {
+                                                <option value="@s"
+                                                        selected="@(string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase))">
+                                                    @s
+                                                </option>
+                                            }
+                                        </select>
+
+                                        <button type="submit" class="btn btn-sm btn-outline-light" title="Save">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+

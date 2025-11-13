@@ -45,7 +45,14 @@
 
                     <div class="col-md-4">
                         <label asp-for="Category" class="form-label"></label>
-                        <input asp-for="Category" class="form-control" />
+                        <select asp-for="Category" class="form-select select-contrast">
+                            @foreach (var c in ViewBag.Categories as List<string>)
+                            {
+                                <option value="@c" selected="@(Model.Category == c)">
+                                    @c
+                                </option>
+                            }
+                        </select>
                         <span asp-validation-for="Category" class="text-danger"></span>
                     </div>
 

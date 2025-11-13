@@ -3,6 +3,13 @@
 @{
     ViewData["Title"] = "Shop";
     ViewData["Subtitle"] = "Choose a product to view details";
+
+    // Read current filter values from the query string so we can keep them in the form.
+    var name = Context.Request.Query["name"].ToString();
+    var category = Context.Request.Query["category"].ToString();
+
+    // Categories for the dropdown: supplied by controller, fall back to ProductCategories.List.
+    IEnumerable<string> categories = ViewBag.Categories ?? ST10382638_CLDV_POE.Models.ProductCategories.List;
 }
 
 <div class="page-head">
@@ -10,6 +17,50 @@
         <h1>@ViewData["Title"]</h1>
         <p class="page-sub">@ViewData["Subtitle"]</p>
     </div>
+</div>
+
+<!-- Search & Filters BELOW header -->
+<div class="search-card mb-3">
+    <form method="get">
+        <div class="row g-3 align-items-end">
+            <!-- Name filter -->
+            <div class="col-12 col-md-6">
+                <label class="form-label mb-1" for="name">Product name</label>
+                <input class="form-control"
+                       type="text"
+                       id="name"
+                       name="name"
+                       value="@name"
+                       placeholder="Search by product name" />
+            </div>
+
+            <!-- Category filter -->
+            <div class="col-12 col-md-4">
+                <label class="form-label mb-1" for="category">Category</label>
+                <select class="form-select select-contrast" id="category" name="category">
+                    <option value="">All categories</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c"
+                                selected="@(string.Equals(category, c, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                            @c
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 col-md-2 d-flex gap-2 justify-content-end">
+                <a class="btn btn-outline-light flex-grow-1"
+                   href="@Url.Action("Main", "Customer")">
+                    Reset
+                </a>
+                <button class="btn btn-primary flex-grow-1" type="submit">
+                    Filter
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 
 @if (!(Model?.Any() ?? false))

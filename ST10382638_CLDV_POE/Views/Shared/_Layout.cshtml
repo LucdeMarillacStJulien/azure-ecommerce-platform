@@ -72,10 +72,11 @@
                     </button>
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
-
-                            <a asp-controller="Cart" asp-action="Index" class="nav-link">
-                                <i class="bi bi-cart fs-5"></i>
-                            </a>
+                            <li>
+                                <a asp-controller="Cart" asp-action="Index" class="nav-link">
+                                    Cart
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Order" asp-action="MyOrders">My Orders</a>
                             </li>
@@ -103,6 +104,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/refresh.js"></script>
     <script src="~/js/delete.js" asp-append-version="true"></script>
     <script src="~/js/ui.order-toast.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

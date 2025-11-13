@@ -15,63 +15,72 @@ using System.ComponentModel.DataAnnotations;
 namespace ST10382638_CLDV_POE.Models
 {
     /// <summary>
-    /// Order entity stored in Azure Table Storage.
-    /// Tracks product purchases, quantities, pricing, and status.
+    /// Represents an Order entity stored in Azure Table Storage.
+    /// Contains customer, pricing, item, and order status information.
     /// </summary>
     public class Order : ITableEntity
     {
         /// <summary>
-        /// Logical partition key. Defaults to "Order".
+        /// Partition key for logical grouping of all Order entities.
+        /// Defaults to "Order".
         /// </summary>
         public string PartitionKey { get; set; } = "Order";
 
         /// <summary>
-        /// Unique row identifier (acts as primary key).
+        /// Unique RowKey (acts as the order identifier/primary key).
         /// </summary>
         [Key]
         public string RowKey { get; set; }
 
         /// <summary>
-        /// Server-maintained timestamp for this entity.
+        /// Azure-managed timestamp for entity version tracking.
         /// </summary>
         public DateTimeOffset? Timestamp { get; set; }
 
         /// <summary>
-        /// Concurrency token used for optimistic concurrency control.
+        /// Azure ETag used for concurrency handling and update control.
         /// </summary>
         public ETag ETag { get; set; }
 
         /// <summary>
-        /// The ID of the customer who placed the order.
+        /// Identifier of the customer who created the order.
+        /// Corresponds to the authenticated user’s ID.
         /// </summary>
         [Required]
         [Display(Name = "Customer ID")]
         public string CustomerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Total cost of the order (UnitPrice × Quantity).
+        /// Total price for the order (sum of UnitPrice × Quantity for all items).
         /// </summary>
         [Range(0, 10_000_000)]
         public double TotalPrice { get; set; }
 
         /// <summary>
-        /// Date and time the order was placed (default = UTC now).
+        /// Date and time the order was placed.
+        /// Defaults to the current UTC time.
         /// </summary>
         [Display(Name = "Order Date")]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Current status of the order (Placed, Processing, Completed, Cancelled).
+        /// Current order status (Placed, Processing, Completed, or Cancelled).
         /// </summary>
         [Required]
         [StringLength(32)]
         public string Status { get; set; } = "Placed";
 
+        /// <summary>
+        /// Serialized JSON representation of the ordered items.
+        /// </summary>
         [Required]
         public string ItemsJson { get; set; } = "[]";
 
+        /// <summary>
+        /// Total number of individual items within the order.
+        /// </summary>
         [Range(0, 1_000_000)]
-        public int ItemCount { get; set; } 
+        public int ItemCount { get; set; }
     }
 }
 //------------------------------------------...ooo000 END OF FILE 000ooo...------------------------------------------------------//
