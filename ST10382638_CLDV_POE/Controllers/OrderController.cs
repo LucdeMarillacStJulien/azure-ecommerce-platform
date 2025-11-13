@@ -236,39 +236,73 @@ namespace ST10382638_CLDV_POE.Controllers
 
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public async Task<IActionResult> MyOrders(string q = null, string status = null)
+        public async Task<IActionResult> MyOrders(string q = null, string status = null, DateTime? dateFrom = null, DateTime? dateTo = null, double? minTotal = null,
+            double? maxTotal = null, int? minItems = null, int? maxItems = null)
         {
             var uid = CurrentUserId();
             var all = await _order.GetAllOrdersAsync() ?? new List<Order>();
+            var mine = all.Where(o => o.CustomerId == uid).ToList();
 
-            var mine = all.Where(o => o.CustomerId == uid)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-
+            // Text search: Order ID only (to mirror placeholder; extend if you add more fields)
             if (!string.IsNullOrWhiteSpace(q))
             {
                 var term = q.Trim();
                 mine = mine.Where(o =>
-                    (!string.IsNullOrEmpty(o.RowKey) && o.RowKey.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrEmpty(o.Status) && o.Status.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    !string.IsNullOrEmpty(o.RowKey) &&
+                    o.RowKey.Contains(term, StringComparison.OrdinalIgnoreCase)
                 ).ToList();
             }
 
+            // Status filter
             if (!string.IsNullOrWhiteSpace(status))
             {
                 var s = status.Trim();
                 mine = mine.Where(o => string.Equals(o.Status, s, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
+            // Date range (inclusive end)
+            if (dateFrom.HasValue)
+                mine = mine.Where(o => o.OrderDate >= dateFrom.Value).ToList();
+
+            if (dateTo.HasValue)
+            {
+                var end = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                mine = mine.Where(o => o.OrderDate <= end).ToList();
+            }
+
+            // Totals
+            if (minTotal.HasValue)
+                mine = mine.Where(o => o.TotalPrice >= minTotal.Value).ToList();
+            if (maxTotal.HasValue)
+                mine = mine.Where(o => o.TotalPrice <= maxTotal.Value).ToList();
+
+            // Item counts
+            if (minItems.HasValue)
+                mine = mine.Where(o => o.ItemCount >= minItems.Value).ToList();
+            if (maxItems.HasValue)
+                mine = mine.Where(o => o.ItemCount <= maxItems.Value).ToList();
+
+            // Default ordering: newest first
             mine = mine.OrderByDescending(o => o.OrderDate).ToList();
 
-            // unified: provide dictionary for the current user's id
+            // Names/status list for the view (kept consistent with your other views)
             ViewData["CustomerNames"] = await BuildCustomerNamesAsync(mine.Select(o => o.CustomerId));
             ViewData["Statuses"] = GetAllStatuses();
+
+            // Preserve chosen filters
+            ViewData["q"] = q;
+            ViewData["status"] = status;
+            ViewData["dateFrom"] = dateFrom?.ToString("yyyy-MM-dd");
+            ViewData["dateTo"] = dateTo?.ToString("yyyy-MM-dd");
+            ViewData["minTotal"] = minTotal;
+            ViewData["maxTotal"] = maxTotal;
+            ViewData["minItems"] = minItems;
+            ViewData["maxItems"] = maxItems;
 
             ViewData["Title"] = "My Orders";
             return View("MyOrders", mine);
         }
+
 
 
         [Authorize(Roles = "Customer")]

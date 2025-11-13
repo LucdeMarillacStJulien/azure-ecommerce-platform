@@ -11,6 +11,7 @@
     var names = ViewData["CustomerNames"] as System.Collections.Generic.IDictionary<int, string>
                 ?? new System.Collections.Generic.Dictionary<int, string>();
     var customerName = names.Values.FirstOrDefault() ?? "Customer";
+    var statuses = OrderStatus.All;
 }
 
 <div class="page-head">
@@ -20,22 +21,67 @@
     </div>
 </div>
 
-<form method="get" asp-controller="Order" asp-action="MyOrders" class="mb-3 search-card">
-    <div class="input-group">
-        <input name="q" type="text" class="form-control"
-               placeholder="Search by Order ID or Status"
-               value="@q">
-        <select class="form-select select-contrast" name="status">
-            <option value="">Status: All</option>
-            @foreach (var s in OrderStatus.All)
-            {
-                <option value="@s" selected="@(string.Equals(status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
-            }
-        </select>
-        <button class="btn btn-primary" type="submit">Search</button>
-    </div>
-    <small class="input-hint">Leave search empty to view all orders.</small>
-</form>
+<div class="search-card mb-3">
+    <form method="get">
+        <div class="row">
+            <div class="col-12">
+                <h5 class="mb-2">Filter my orders</h5>
+            </div>
+        </div>
+
+        <div class="row g-2 align-items-end">
+            <!-- Row 1: Order ID + Date range + Status -->
+            <div class="col-12 col-md-3">
+                <label class="form-label mb-1">Order ID</label>
+                <input class="form-control" type="text" name="q" value="@q" placeholder="Search Order ID" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">From</label>
+                <input class="form-control" type="date" name="dateFrom" value="@(ViewData["dateFrom"])" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">To</label>
+                <input class="form-control" type="date" name="dateTo" value="@(ViewData["dateTo"])" />
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label mb-1">Status</label>
+                <select class="form-select select-contrast" name="status">
+                    <option value="">Status: All</option>
+                    @foreach (var s in statuses)
+                    {
+                        <option value="@s" selected="@(string.Equals(status, s, StringComparison.OrdinalIgnoreCase))">@s</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Row 2: Totals + Item counts -->
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Min total</label>
+                <input class="form-control" type="number" step="0.01" name="minTotal" value="@(ViewData["minTotal"])" placeholder="e.g. 100.00" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Max total</label>
+                <input class="form-control" type="number" step="0.01" name="maxTotal" value="@(ViewData["maxTotal"])" placeholder="e.g. 500.00" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Min items</label>
+                <input class="form-control" type="number" name="minItems" value="@(ViewData["minItems"])" placeholder="e.g. 1" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Max items</label>
+                <input class="form-control" type="number" name="maxItems" value="@(ViewData["maxItems"])" placeholder="e.g. 10" />
+            </div>
+
+            <!-- Row 3: Actions -->
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <a class="btn btn-outline-light" href="@Url.Action("MyOrders", "Order")" title="Reset">Reset</a>
+                <button class="btn btn-primary" type="submit" title="Filter">
+                    <i class="bi bi-search"></i> Apply
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 
 <div class="glass-card p-3">
     @if (Model == null || !Model.Any())
@@ -69,7 +115,7 @@
                     {
                         <tr data-row="order">
                             <td class="text-start">@p.RowKey</td>
-                            <td class="text-start">@p.OrderDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-start">@p.OrderDate.ToLocalTime().ToString("yyyy-MM-dd")</td>
                             <td class="text-center">@p.ItemCount</td>
                             <td class="text-end price text-nowrap">R @p.TotalPrice.ToString("0.00")</td>
                             <td class="text-center">

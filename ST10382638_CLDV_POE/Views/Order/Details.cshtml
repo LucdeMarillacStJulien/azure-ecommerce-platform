@@ -1,8 +1,13 @@
 ﻿@model ST10382638_CLDV_POE.Models.Order
+@using System.Text.Json
+@using System.Globalization
+
 @{
     ViewData["Title"] = $"Order {Model?.RowKey}";
     var returnUrl = (string?)ViewData["returnUrl"] ?? Url.Action("MyOrders", "Order");
-    string BadgeClass(string s) => s?.ToLowerInvariant() switch
+
+    // Status badge color logic
+    string badgeClass = Model?.Status?.ToLowerInvariant() switch
     {
         "placed" => "status-placed",
         "processed" => "status-processed",
@@ -10,20 +15,167 @@
         "cancelled" => "status-cancelled",
         _ => "status-default"
     };
-}
 
+    // Parse items
+    var items = new List<(string Name, string Img, decimal UnitPrice, int Qty, decimal LineTotal)>();
+    if (!string.IsNullOrWhiteSpace(Model?.ItemsJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(Model.ItemsJson);
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var el in doc.RootElement.EnumerateArray())
+                {
+                    var name = el.TryGetProperty("ProductName", out var pn) && pn.ValueKind == JsonValueKind.String
+                        ? pn.GetString() ?? "Item"
+                        : "Item";
+
+                    var img = el.TryGetProperty("ImageUrl", out var iu) && iu.ValueKind == JsonValueKind.String
+                        ? iu.GetString() ?? ""
+                        : "";
+
+                    decimal unit = 0m;
+                    if (el.TryGetProperty("UnitPrice", out var up))
+                    {
+                        unit = up.ValueKind switch
+                        {
+                            JsonValueKind.Number => up.TryGetDecimal(out var d) ? d : 0m,
+                            JsonValueKind.String => decimal.TryParse(up.GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0m,
+                            _ => 0m
+                        };
+                    }
+
+                    var qty = el.TryGetProperty("Quantity", out var qEl) && qEl.ValueKind == JsonValueKind.Number ? qEl.GetInt32() : 0;
+                    var line = unit * qty;
+                    items.Add((name, img, unit, qty, line));
+                }
+            }
+        }
+        catch { }
+    }
+
+    var currency = "R";
+    var total = (decimal)(Model?.TotalPrice ?? 0d);
+    var subtotal = items.Sum(i => i.LineTotal);
+}
 <div class="page-head">
     <h1>Order @Model.RowKey</h1>
-    <div class="page-sub">
-        <span class="@BadgeClass(Model.Status)">@Model.Status</span>
-        • @Model.OrderDate.ToString("yyyy-MM-dd HH:mm")
+</div>
+<div class="glass-card mb-4 p-4">
+    <div class="container-fluid">
+        <div class="row gy-3">
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Order ID</h6>
+                <div class="fw-semibold text-light">@Model.RowKey</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Order Date</h6>
+                <div>@Model.OrderDate.ToString("dd MMM yyyy HH:mm")</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Status</h6>
+                @if (Model.Status?.ToLower() == "placed")
+                {
+                    <span class="badge-soft status-placed rounded-pill px-3 py-1">Placed</span>
+                }
+                else if (Model.Status?.ToLower() == "processed")
+                {
+                    <span class="badge-soft status-processing rounded-pill px-3 py-1">Processed</span>
+                }
+                else if (Model.Status?.ToLower() == "completed")
+                {
+                    <span class="badge-soft status-completed rounded-pill px-3 py-1">Completed</span>
+                }
+                else if (Model.Status?.ToLower() == "cancelled")
+                {
+                    <span class="badge-soft status-cancelled rounded-pill px-3 py-1">Cancelled</span>
+                }
+                else
+                {
+                    <span class="badge-soft status-default rounded-pill px-3 py-1">@Model.Status</span>
+                }
+            </div>
+        </div>
+
+        <hr class="my-3" />
+
+        <!-- Second row -->
+        <div class="row gy-3">
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Items</h6>
+                <div class="fw-semibold">@Model.ItemCount</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Subtotal</h6>
+                <div>@currency @subtotal.ToString("0.00")</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <h6 class="text-muted mb-1">Total</h6>
+                <div class="fw-bold text-light">@currency @total.ToString("0.00")</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="glass-card" style="padding:1rem;">
-    <h3 class="mb-3">Items</h3>
-    <pre style="white-space:pre-wrap;">@Model.ItemsJson</pre>
-    <div class="mt-3">
+<!-- ITEMS CARD -->
+<div class="glass-card p-4">
+    <h3 class="mb-3">Order Items</h3>
+
+    @if (items.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-neon align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:80px;"></th>
+                        <th>Product</th>
+                        <th class="text-end">Unit Cost</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var it in items)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(it.Img))
+                                {
+                                    <img src="@it.Img" alt="@it.Name"
+                                         style="width:60px;height:60px;object-fit:cover;border-radius:10px;" />
+                                }
+                                else
+                                {
+                                    <div style="width:60px;height:60px;background:#3C3C3C;border-radius:10px;
+                                                            display:flex;align-items:center;justify-content:center;color:#A2A2A2;">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>@it.Name</td>
+                            <td class="text-end">@currency @it.UnitPrice.ToString("0.00")</td>
+                            <td class="text-end">@it.Qty</td>
+                            <td class="text-end fw-bold">@currency @it.LineTotal.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-end">Order Total</th>
+                        <th class="text-end">@currency @total.ToString("0.00")</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty mb-3">No items available for this order.</div>
+        <pre style="white-space:pre-wrap;">@Model.ItemsJson</pre>
+    }
+
+    <div class="mt-3 d-flex gap-2">
         <a class="btn btn-secondary" href="@returnUrl">Back</a>
     </div>
 </div>
