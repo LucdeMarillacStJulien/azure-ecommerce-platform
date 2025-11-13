@@ -128,8 +128,17 @@ namespace ST10382638_CLDV_POE.Services
             var e = await GetProductByIdAsync(productId); // PartitionKey = "Product"
             if (e == null) return false;
 
-            if (e.StockQuantity < qty) return false; // block oversell
-            e.StockQuantity -= qty;                  // decrease (reserve)
+            // Block oversell: not enough stock, do nothing.
+            if (e.StockQuantity < qty) return false;
+
+            // Decrease stock for this order.
+            e.StockQuantity -= qty;
+
+            // If stock has reached zero after this order, mark product unavailable.
+            if (e.StockQuantity == 0)
+            {
+                e.IsAvailable = false;
+            }
 
             await _tableClient.UpdateEntityAsync(e, ETag.All, TableUpdateMode.Replace);
             return true;

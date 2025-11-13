@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Customers";
     ViewData["Subtitle"] = "Manage customer profiles in Azure Table Storage";
+
+    // Current search term from the query string (for sticky input value).
+    var q = Context.Request.Query["q"].ToString();
 }
 
 <div class="page-head">
@@ -19,15 +22,36 @@
 
 
 
-<form method="get" asp-controller="Customer" asp-action="Index" class="mb-3 search-card">
-    <div class="input-group">
-        <input name="id" type="text" class="form-control"
-               placeholder="Enter Customer ID (RowKey)"
-               value="@(Context.Request.Query["id"])">
-        <button class="btn btn-primary" type="submit">Search</button>
-    </div>
-    <small class="input-hint">Leave empty to view all customers.</small>
-</form>
+<div class="search-card mb-3">
+    <form method="get" asp-action="Index" class="d-flex flex-wrap gap-2 align-items-end">
+
+        <!-- Search input (grows to fill space) -->
+        <div class="flex-grow-1">
+            <label class="form-label mb-1" for="q">Search by name</label>
+            <div class="input-group">
+                <input name="q"
+                       id="q"
+                       type="text"
+                       class="form-control"
+                       placeholder="Enter first or last name"
+                       value="@q" />
+            </div>
+        </div>
+
+        <!-- Action buttons (fixed width, stay together) -->
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+
+            <a href="@Url.Action("Index", "Customer")"
+               class="btn btn-outline-light">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </a>
+        </div>
+
+    </form>
+</div>
 
 @if (!string.IsNullOrEmpty(ViewBag.Message as string))
 {

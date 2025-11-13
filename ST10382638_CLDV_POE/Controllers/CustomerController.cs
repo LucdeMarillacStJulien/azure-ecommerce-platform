@@ -97,14 +97,32 @@ namespace ST10382638_CLDV_POE.Controllers
 
         //------------------------------------------------------------------------------------------------------------------------//
         /// <summary>
-        /// Admin-only: List all customers from EF Core.
+        /// Admin-only: List all customers from EF Core, with optional name search.
         /// </summary>
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(string? q)
         {
-            // Load all customers for admin view.
-            var customer = await _context.Customer.ToListAsync();
-            return View(customer);
+            // Start with the full customer set from EF Core.
+            var query = _context.Customer.AsQueryable();
+
+            // If a search term is provided, filter by first/last name.
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim().ToLower();
+
+                query = query.Where(c =>
+                    (c.FirstName != null && c.FirstName.ToLower().Contains(term)) ||
+                    (c.LastName != null && c.LastName.ToLower().Contains(term)));
+            }
+
+            // Materialise list for the view, ordered by name.
+            var customers = await query
+                .AsNoTracking()
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
+                .ToListAsync();
+
+            return View(customers);
         }
 
         // ---------- REGISTRATION / CREATE PIPELINE ----------
