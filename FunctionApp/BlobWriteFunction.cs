@@ -48,7 +48,7 @@ namespace FunctionApp
             var containerName = query["container"];
 
             // Connect to blob container
-            var conn = _config["AzureStorage:ConnectionString"];
+            var conn = _config["AzureWebJobsStorage"];
             var container = new BlobContainerClient(conn, containerName);
             var blob = container.GetBlobClient(fileName);
 

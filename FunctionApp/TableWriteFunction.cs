@@ -82,7 +82,7 @@ public class TableWriteFunction
     /// </summary>
     private TableClient GetTableClient(string tableName)
     {
-        var connectionString = _config["AzureStorage:ConnectionString"];
+        var connectionString = _config["AzureWebJobsStorage"];
         var tableClient = new TableClient(connectionString, tableName);
         tableClient.CreateIfNotExists();
         return tableClient;

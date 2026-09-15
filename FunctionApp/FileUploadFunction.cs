@@ -49,7 +49,7 @@ public class FileUploadFunction
         var shareName = q["shareName"]; // Target file share
         long length = long.Parse(q["length"]); // Length of file in bytes
 
-        var shareClient = new ShareClient(_config["AzureStorage:ConnectionString"], shareName);
+        var shareClient = new ShareClient(_config["AzureWebJobsStorage"], shareName);
         var fileClient = shareClient.GetRootDirectoryClient().GetFileClient(fileName);
 
         await fileClient.CreateAsync(length);          // Creates the file with specified length

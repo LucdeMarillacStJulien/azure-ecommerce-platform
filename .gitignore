@@ -361,3 +361,17 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# ---- Secrets / local config (added during pre-publish audit) ----
+# NOTE: appsettings.json IS committed, but must contain PLACEHOLDERS only.
+# Real values belong in user-secrets, env vars, or appsettings.Development.json.
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.Local.json
+local.settings.json
+secrets.json
+dp-keys/
+*.pfx
+*.snk
+*.p12
+.env
+.env.*
