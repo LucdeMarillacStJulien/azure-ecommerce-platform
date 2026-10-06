@@ -375,3 +375,8 @@ dp-keys/
 *.p12
 .env
 .env.*
+
+# ---- feature/azurite-offline ----
+# This file holds ONLY offline defaults (Azurite dev account, local Docker SQL
+# password, localhost Function URLs). No Azure secrets.
+!ST10382638_CLDV_POE/appsettings.Development.json

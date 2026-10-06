@@ -1,0 +1,74 @@
+# Fully offline stack for the feature/azurite-offline branch. Start with start-offline.ps1.
+#
+# Every service shares Azurite's network namespace (network_mode: service:azurite), so
+# 127.0.0.1 means the same thing inside each container AND on the host. That keeps blob
+# URLs returned by the BlobWrite Function (http://127.0.0.1:10000/...) loadable in the
+# browser, and lets the app run unchanged in Docker or Visual Studio.
+name: cldv-poe-offline
+
+x-sql-connection: &sql-connection "Server=127.0.0.1,1433;Database=CLDV_POE;User Id=sa;Password=LocalDev_Only_Passw0rd!;TrustServerCertificate=True"
+
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
+    command: >
+      azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+      --location /data --skipApiVersionCheck
+    ports:
+      - "127.0.0.1:10000:10000" # Azurite Blob
+      - "127.0.0.1:10001:10001" # Azurite Queue
+      - "127.0.0.1:10002:10002" # Azurite Table
+      - "127.0.0.1:1433:1433"   # SQL Server
+      - "127.0.0.1:7135:7135"   # FunctionApp
+      - "127.0.0.1:8080:8080"   # Web app
+    volumes:
+      - azurite-data:/data
+
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+    network_mode: service:azurite
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      # Local container only. Not used by any Azure resource.
+      MSSQL_SA_PASSWORD: "LocalDev_Only_Passw0rd!"
+    volumes:
+      - sql-data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -Q "SELECT 1" -o /dev/null
+      interval: 5s
+      retries: 30
+      start_period: 10s
+
+  migrate:
+    build: { context: ., target: migrate }
+    network_mode: service:azurite
+    command: ["--connection", *sql-connection]
+    depends_on:
+      sql: { condition: service_healthy }
+
+  functions:
+    build: { context: ., target: functions }
+    network_mode: service:azurite
+    environment:
+      ASPNETCORE_URLS: "http://+:7135"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      ConnectionStrings__DefaultConnection: *sql-connection
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  web:
+    build: { context: ., target: web }
+    network_mode: service:azurite
+    environment:
+      # Loads appsettings.Development.json (Azurite, local SQL, local Function URLs).
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_HTTP_PORTS: "8080"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      functions: { condition: service_started }
+
+volumes:
+  azurite-data:
+  sql-data:
